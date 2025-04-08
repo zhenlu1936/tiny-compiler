@@ -1,0 +1,29 @@
+var a 
+label add 
+start
+param x 
+param y 
+t0 = x + y
+return t0 
+end
+
+label main 
+start
+var a 
+var b 
+var c 
+a = 2 
+b = 1 
+label label_0 
+t1 = b < 10
+ifz t1 goto label_1 
+arg a 
+arg b 
+t2 = call add 
+b = t2 
+goto label_0 
+label label_1
+c = b 
+return c 
+end
+

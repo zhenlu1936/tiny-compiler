@@ -1,0 +1,18 @@
+int a;
+
+int add(int x,int y)
+{
+	return x+y;
+}
+
+int main()
+{
+	int a,b,c;
+	a = 2;
+	b = 1;
+	while(b<10){
+		b = add(a,b);
+	}
+	c = b;
+	return c;
+}
