@@ -48,6 +48,10 @@
 			return TEXT;
 		}
 
+"++"  {  return INC; }
+
+"--"  {  return DEC; }
+
 "=="  {  return EQ;  }
 
 "!="  {  return NE;  }

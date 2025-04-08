@@ -1,4 +1,5 @@
 var a 
+
 label add 
 start
 param x 
@@ -12,18 +13,28 @@ start
 var a 
 var b 
 var c 
+var i 
 a = 2 
 b = 1 
+c = 0 
+i = 0 
 label label_0 
-t1 = b < 10
+t1 = i < 5
 ifz t1 goto label_1 
-arg a 
+t3 = a 
+a = t3 - 1 
+arg t3 
 arg b 
-t2 = call add 
-b = t2 
+t4 = call add 
+b = t4 
+t2 = i 
+i = t2 + 1 
 goto label_0 
-label label_1
-c = b 
+label label_1 
+t5 = c == b
+ifz t5 goto label_2 
+c = 5 
+label label_2 
 return c 
 end
 
