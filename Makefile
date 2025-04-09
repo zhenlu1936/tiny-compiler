@@ -11,7 +11,7 @@ e.tab.o: e_helper.o e.y
 	bison -d e.y
 	gcc -c e.tab.c -o e.tab.o
 
-e_helper.o: e_helper.c
+e_helper.o: e_helper.c e_helper.h
 	gcc -c e_helper.c -o e_helper.o
 
 clean:

@@ -1,40 +1,38 @@
-var a 
+var a
 
-label add 
+label add
 start
-param x 
-param y 
+param y
 t0 = x + y
-return t0 
+return t0
 end
 
-label main 
+label main
 start
-var a 
-var b 
-var c 
-var i 
-a = 2 
-b = 1 
-c = 0 
-i = 0 
-label label_0 
+var a
+var b
+var c
+var i
+a = 2
+b = 1
+c = 0
+i = 0
+label label_0
 t1 = i < 5
-ifz t1 goto label_1 
-t3 = a 
-a = t3 - 1 
-arg t3 
-arg b 
-t4 = call add 
-b = t4 
-t2 = i 
-i = t2 + 1 
-goto label_0 
-label label_1 
+ifz t1 goto label_1
+t3 = a
+a = t3 - 1
+arg t3
+arg b
+t4 = call add
+b = t4
+t2 = i
+i = t2 + 1
+goto label_0
 t5 = c == b
-ifz t5 goto label_2 
-c = 5 
-label label_2 
-return c 
+ifz t5 goto label_2
+c = 5
+label label_2
+return c
 end
 

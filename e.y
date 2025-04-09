@@ -74,7 +74,7 @@ void yyerror(char* msg);
 program : function_declaration_list
                             {
                                 $$ = new_op();
-                                $$->tac = copy_tac($1->tac);
+                                cpy_tac($$->tac,$1->tac);
                                 printf("program compiled to tac!\n\n");
 
                                 FILE *fp = fopen("tac.txt", "w");
@@ -89,35 +89,39 @@ program : function_declaration_list
 function_declaration_list : function_declaration
                             {
                                 $$ = new_op();
-                                $$->tac = copy_tac($1->tac);
+                                cpy_tac($$->tac,$1->tac);
                             }
 | function_declaration_list function_declaration
                             {
                                 $$ = new_op();
-                                $$->tac = cat_tac($1->tac,$2->tac);
+                                cat_tac($$->tac,$1->tac);
+                                cat_tac($$->tac,$2->tac);
                             }
 ;
 
 function_declaration : function
                             {
                                 $$ = new_op();
-                                $$->tac = cat_tac($1->tac,"\n");
+                                cat_tac($$->tac,$1->tac);
+                                cat_tac($$->tac,"\n");
                             }
 | declaration 
                             {
                                 $$ = new_op();
-                                $$->tac = cat_tac($1->tac,"\n");
+                                cat_tac($$->tac,$1->tac);
+                                cat_tac($$->tac,"\n");
                             }
 ;
 
 function : function_head '(' parameter_list ')' block
                             {
                                 $$ = new_op();
-                                $$->tac = cat_tac($1->tac,$3->tac);
-                                $$->tac = cat_tac($$->tac,$5->tac);
+                                cat_tac($$->tac,$1->tac);
+                                cat_tac($$->tac,$3->tac);
+                                cat_tac($$->tac,$5->tac);
                                 BUF_ALLOC(buf);
                                 sprintf(buf,"end\n");
-                                $$->tac = cat_tac($$->tac,buf);
+                                cat_tac($$->tac,buf);
                             }
 | error {}
 ;
@@ -126,11 +130,12 @@ function_head : INT IDENTIFIER
                             {
                                 $$ = new_op();
                                 find_identifier($2,ADD,INT_FUNC);
-                                BUF_ALLOC(buf_1)
-                                sprintf(buf_1,"label %s \n",$2); // %s与\n之间必须有空格，否则start后会凭空多出一个param1。我不知道为什么
-                                BUF_ALLOC(buf_2)
+                                BUF_ALLOC(buf_1);
+                                sprintf(buf_1,"label %s\n",$2);
+                                BUF_ALLOC(buf_2);
                                 sprintf(buf_2,"start\n");
-                                $$->tac = cat_tac(buf_1,buf_2);
+                                cat_tac($$->tac,buf_1);
+                                cat_tac($$->tac,buf_2);
                             }
 ;
 
@@ -139,16 +144,16 @@ parameter_list : INT IDENTIFIER
                                 $$ = new_op();
                                 find_identifier($2,ADD,INT_VAR); // 可能要改成局部
                                 BUF_ALLOC(buf);
-                                sprintf(buf,"param %s \n",$2);
-                                $$->tac = copy_tac(buf);
+                                sprintf(buf,"param %s\n",$2);
+                                cpy_tac($$->tac,buf);
                             }
 | parameter_list ',' INT IDENTIFIER               
                             {
                                 $$ = new_op();
                                 find_identifier($4,ADD,INT_VAR); 
                                 BUF_ALLOC(buf);
-                                sprintf(buf,"param %s \n",$4);
-                                $$->tac = cat_tac($1->tac,buf);
+                                sprintf(buf,"param %s\n",$4);
+                                cpy_tac($$->tac,buf);
                             }
 |                           {
                                 $$ = new_op();
@@ -158,7 +163,8 @@ parameter_list : INT IDENTIFIER
 block: '{' declaration_list statement_list '}'					
                             {
                                 $$ = new_op();
-                                $$->tac = cat_tac($2->tac,$3->tac);
+                                cat_tac($$->tac,$2->tac);
+                                cat_tac($$->tac,$3->tac);
                             }
 ;
 
@@ -169,14 +175,15 @@ declaration_list :
 | declaration_list declaration
                             {
                                 $$ = new_op();
-                                $$->tac = cat_tac($1->tac,$2->tac);
+                                cat_tac($$->tac,$1->tac);
+                                cat_tac($$->tac,$2->tac);
                             }
 ;
 
 declaration : INT variable_list ';'
                             {
                                 $$ = new_op();
-                                $$->tac = copy_tac($2->tac);
+                                cpy_tac($$->tac,$2->tac);
                             }
 ;
 
@@ -185,92 +192,94 @@ variable_list : IDENTIFIER
                                 $$ = new_op();
                                 find_identifier($1,ADD,INT_VAR);
                                 BUF_ALLOC(buf);
-                                sprintf(buf,"var %s \n",$1);
-                                $$->tac = copy_tac(buf);
+                                sprintf(buf,"var %s\n",$1);
+                                cpy_tac($$->tac,buf);
                             }
 | variable_list ',' IDENTIFIER
                             {
                                 $$ = new_op();
                                 find_identifier($3,ADD,INT_VAR);
                                 BUF_ALLOC(buf);
-                                sprintf(buf,"var %s \n",$3);
-                                $$->tac = cat_tac($1->tac,buf);
+                                sprintf(buf,"var %s\n",$3);
+                                cat_tac($$->tac,$1->tac);
+                                cat_tac($$->tac,buf);
                             }
 ;
 
 statement_list : statement			
                             {
                                 $$ = new_op();
-                                $$->tac = copy_tac($1->tac);
+                                cpy_tac($$->tac,$1->tac);
                             }  
 | statement_list statement  
                             {
                                 $$ = new_op();
-                                $$->tac = cat_tac($1->tac,$2->tac);
+                                cat_tac($$->tac,$1->tac);
+                                cat_tac($$->tac,$2->tac);
                             }
 ;
 
 statement_n_expression : statement
                             {
                                 $$ = new_op();
-                                $$->tac = copy_tac($1->tac);
+                                cpy_tac($$->tac,$1->tac);
                             }
 | expression
                             {
                                 $$ = new_op();
-                                $$->tac = copy_tac($1->tac);
+                                cpy_tac($$->tac,$1->tac);
                                 $$->addr = $1->addr;
                             }
 
 statement : assignment_statement ';'
                             {
                                 $$ = new_op();
-                                $$->tac = copy_tac($1->tac);
+                                cpy_tac($$->tac,$1->tac);
                             }
 | input_statement ';' 
                             {
                                 $$ = new_op();
-                                $$->tac = copy_tac($1->tac);
+                                cpy_tac($$->tac,$1->tac);
                             }
 | output_statement ';' 
                             {
                                 $$ = new_op();
-                                $$->tac = copy_tac($1->tac);
+                                cpy_tac($$->tac,$1->tac);
                             }
 | call_statement ';'
                             {
                                 $$ = new_op();
-                                $$->tac = copy_tac($1->tac);
+                                cpy_tac($$->tac,$1->tac);
                             }
 | return_statement ';' 
                             {
                                 $$ = new_op();
-                                $$->tac = copy_tac($1->tac);
+                                cpy_tac($$->tac,$1->tac);
                             }
 | null_statement ';'
                             {
                                 $$ = new_op();
-                                $$->tac = copy_tac($1->tac);
+                                cpy_tac($$->tac,$1->tac);
                             }
 | if_statement
                             {
                                 $$ = new_op();
-                                $$->tac = copy_tac($1->tac);
+                                cpy_tac($$->tac,$1->tac);
                             }
 | while_statement 
                             {
                                 $$ = new_op();
-                                $$->tac = copy_tac($1->tac);
+                                cpy_tac($$->tac,$1->tac);
                             }
 | for_statement 
                             {
                                 $$ = new_op();
-                                $$->tac = copy_tac($1->tac);
+                                cpy_tac($$->tac,$1->tac);
                             }
 | block 
                             {
                                 $$ = new_op();
-                                $$->tac = copy_tac($1->tac);
+                                cpy_tac($$->tac,$1->tac);
                             }
 | error
                             {
@@ -282,16 +291,18 @@ assignment_statement : IDENTIFIER '=' expression
                             {
                                 $$ = new_op();
                                 BUF_ALLOC(buf);
-                                sprintf(buf,"%s = %s \n",$1,identifiers[$3->addr].name);
-                                $$->tac = cat_tac($3->tac,buf);
+                                sprintf(buf,"%s = %s\n",$1,identifiers[$3->addr].name);
+                                cat_tac($$->tac,$3->tac);
+                                cat_tac($$->tac,buf);
                                 $$->addr = $3->addr;
                             }
 | IDENTIFIER '=' assignment_statement 
                             {
                                 $$ = new_op();
                                 BUF_ALLOC(buf);
-                                sprintf(buf,"%s = %s \n",$1,identifiers[$3->addr].name);
-                                $$->tac = cat_tac($3->tac,buf);
+                                sprintf(buf,"%s = %s\n",$1,identifiers[$3->addr].name);
+                                cat_tac($$->tac,$3->tac);
+                                cat_tac($$->tac,buf);
                                 $$->addr = $3->addr;
                             }
 ;
@@ -300,8 +311,8 @@ input_statement : INPUT IDENTIFIER
                             {
                                 $$ = new_op();
                                 BUF_ALLOC(buf);
-                                sprintf(buf,"input %s \n",$2);
-                                $$->tac = copy_tac(buf);
+                                sprintf(buf,"input %s\n",$2);
+                                cpy_tac($$->tac,buf);
                             }
 ;
 
@@ -309,15 +320,15 @@ output_statement : OUTPUT IDENTIFIER
                             {
                                 $$ = new_op();
                                 BUF_ALLOC(buf);
-                                sprintf(buf,"output %s \n",$2);
-                                $$->tac = copy_tac(buf);
+                                sprintf(buf,"output %s\n",$2);
+                                cpy_tac($$->tac,buf);
                             }
 | OUTPUT TEXT
                             {
                                 $$ = new_op();
                                 BUF_ALLOC(buf);
-                                sprintf(buf,"output %s \n",$2);
-                                $$->tac = copy_tac(buf);
+                                sprintf(buf,"output %s\n",$2);
+                                cpy_tac($$->tac,buf);
                             }
 ;
 
@@ -325,8 +336,10 @@ return_statement : RETURN expression
                             {
                                 $$ = new_op();
                                 BUF_ALLOC(buf);
-                                sprintf(buf,"return %s \n",identifiers[$2->addr].name);
-                                $$->tac = cat_tac($2->tac,buf);
+                                sprintf(buf,"return %s\n",identifiers[$2->addr].name);
+                                //$$->tac = cat_tac($2->tac,buf);
+                                cat_tac($$->tac,$2->tac);
+                                cat_tac($$->tac,buf);
                             }
 ;
 
@@ -343,11 +356,12 @@ if_statement : IF '(' expression ')' block
                                 sprintf(label_name,"label_%d",label_amount++);
                                 find_identifier(label_name,ADD,LABEL_IFZ);
                                 BUF_ALLOC(buf);
-                                sprintf(buf,"ifz %s goto %s \n",identifiers[$3->addr].name,label_name);
-                                $$->tac = cat_tac($3->tac,buf);
-                                $$->tac = cat_tac($$->tac,$5->tac);
-                                sprintf(buf,"label %s \n",label_name);
-                                $$->tac = cat_tac($$->tac,buf);
+                                sprintf(buf,"ifz %s goto %s\n",identifiers[$3->addr].name,label_name);
+                                cat_tac($$->tac,$3->tac);
+                                cat_tac($$->tac,buf);
+                                cat_tac($$->tac,$5->tac);
+                                sprintf(buf,"label %s\n",label_name);
+                                cat_tac($$->tac,buf);
                             }
 | IF '(' expression ')' block ELSE block
                             {
@@ -356,21 +370,22 @@ if_statement : IF '(' expression ')' block
                                 sprintf(label_name_1,"label_%d",label_amount++);
                                 find_identifier(label_name_1,ADD,LABEL_IFZ);
                                 BUF_ALLOC(buf);
-                                sprintf(buf,"ifz %s goto %s \n",identifiers[$3->addr].name,label_name_1);
-                                $$->tac = cat_tac($3->tac,buf);
-                                $$->tac = cat_tac($$->tac,$5->tac);
+                                sprintf(buf,"ifz %s goto %s\n",identifiers[$3->addr].name,label_name_1);
+                                cat_tac($$->tac,$3->tac);
+                                cat_tac($$->tac,buf);
+                                cat_tac($$->tac,$5->tac);
 
                                 NAME_ALLOC(label_name_2);
                                 sprintf(label_name_2,"label_%d",label_amount++);
                                 find_identifier(label_name_2,ADD,LABEL_IFZ);
-                                sprintf(buf,"goto %s \n",label_name_2);
-                                $$->tac = cat_tac($$->tac,buf);
-                                sprintf(buf,"label %s \n",label_name_1);
-                                $$->tac = cat_tac($$->tac,buf);
+                                sprintf(buf,"goto %s\n",label_name_2);
+                                cat_tac($$->tac,buf);
+                                sprintf(buf,"label %s\n",label_name_1);
+                                cat_tac($$->tac,buf);
 
-                                $$->tac = cat_tac($$->tac,$7->tac);
-                                sprintf(buf,"label %s \n",label_name_2);
-                                $$->tac = cat_tac($$->tac,buf);
+                                cat_tac($$->tac,$7->tac);
+                                sprintf(buf,"label %s\n",label_name_2);
+                                cat_tac($$->tac,buf);
                             }
 ;
 
@@ -385,16 +400,17 @@ while_statement : WHILE '(' expression ')' block
                                 find_identifier(label_name_2,ADD,LABEL_IFZ);
 
                                 BUF_ALLOC(buf);
-                                sprintf(buf,"label %s \n",label_name_1);
-                                $$->tac = cat_tac(buf,$3->tac);
-                                sprintf(buf,"ifz %s goto %s \n",identifiers[$3->addr].name,label_name_2);
-                                $$->tac = cat_tac($$->tac,buf);
-                                $$->tac = cat_tac($$->tac,$5->tac);
+                                sprintf(buf,"label %s\n",label_name_1);
+                                cat_tac($$->tac,buf);
+                                cat_tac($$->tac,$3->tac);
+                                sprintf(buf,"ifz %s goto %s\n",identifiers[$3->addr].name,label_name_2);
+                                cat_tac($$->tac,buf);
+                                cat_tac($$->tac,$5->tac);
 
-                                sprintf(buf,"goto %s \n",label_name_1);
-                                $$->tac = cat_tac($$->tac,buf);
-                                sprintf(buf,"label %s\n",label_name_2); // 我不知道为什么，这儿最后加上空格反倒会出错。
-                                $$->tac = cat_tac($$->tac,buf);
+                                sprintf(buf,"goto %s\n",label_name_1);
+                                cat_tac($$->tac,buf);
+                                sprintf(buf,"label %s\n",label_name_2);
+                                cat_tac($$->tac,buf);
                             }
 ;
 
@@ -410,18 +426,19 @@ for_statement : FOR '(' assignment_statement ';' expression ';' statement_n_expr
                                 find_identifier(label_name_2,ADD,LABEL_IFZ);
 
                                 BUF_ALLOC(buf);
-                                sprintf(buf,"label %s \n",label_name_1);
-                                $$->tac = cat_tac($3->tac,buf);
-                                $$->tac = cat_tac($$->tac,$5->tac);
-                                sprintf(buf,"ifz %s goto %s \n",identifiers[$5->addr].name,label_name_2);
-                                $$->tac = cat_tac($$->tac,buf);
-                                $$->tac = cat_tac($$->tac,$9->tac);
-                                $$->tac = cat_tac($$->tac,$7->tac);
+                                sprintf(buf,"label %s\n",label_name_1);
+                                cat_tac($$->tac,$3->tac);
+                                cat_tac($$->tac,buf);
+                                cat_tac($$->tac,$5->tac);
+                                sprintf(buf,"ifz %s goto %s\n",identifiers[$5->addr].name,label_name_2);
+                                cat_tac($$->tac,buf);
+                                cat_tac($$->tac,$9->tac);
+                                cat_tac($$->tac,$7->tac);
 
-                                sprintf(buf,"goto %s \n",label_name_1);
-                                $$->tac = cat_tac($$->tac,buf);
-                                sprintf(buf,"label %s \n",label_name_2);
-                                $$->tac = cat_tac($$->tac,buf);
+                                sprintf(buf,"goto %s\n",label_name_1);
+                                cat_tac($$->tac,buf);
+                                memset(buf,0,BUF_SIZE);
+                                cat_tac($$->tac,buf);
                             }
 ;
 
@@ -430,8 +447,9 @@ call_statement : IDENTIFIER '(' argument_list ')'
                                 $$ = new_op();
                                 int t = new_temp();
                                 BUF_ALLOC(buf);
-                                sprintf(buf,"%s = call %s \n",identifiers[t].name,$1);
-                                $$->tac = cat_tac($3->tac,buf);
+                                sprintf(buf,"%s = call %s\n",identifiers[t].name,$1);
+                                cat_tac($$->tac,$3->tac);
+                                cat_tac($$->tac,buf);
                                 $$->addr = t;
                             }
 ;
@@ -443,7 +461,7 @@ argument_list  :
 | expression_list
                             {
                                 $$ = new_op();
-                                $$->tac = copy_tac($1->tac);
+                                cpy_tac($$->tac,$1->tac);
                             }
 ;
 
@@ -451,16 +469,18 @@ expression_list : expression
                             {
                                 $$ = new_op();
                                 BUF_ALLOC(buf);
-                                sprintf(buf,"arg %s \n",identifiers[$1->addr].name);
-                                $$->tac = cat_tac($1->tac,buf);
+                                sprintf(buf,"arg %s\n",identifiers[$1->addr].name);
+                                cat_tac($$->tac,$1->tac);
+                                cat_tac($$->tac,buf);
                             }
 |  expression_list ',' expression
                             {
                                 $$ = new_op();
                                 BUF_ALLOC(buf);
-                                sprintf(buf,"arg %s \n",identifiers[$3->addr].name);
-                                $$->tac = cat_tac($1->tac,$3->tac);
-                                $$->tac = cat_tac($$->tac,buf);
+                                sprintf(buf,"arg %s\n",identifiers[$3->addr].name);
+                                cat_tac($$->tac,$1->tac);
+                                cat_tac($$->tac,$3->tac);
+                                cat_tac($$->tac,buf);
                             }
 ;
 
@@ -469,10 +489,10 @@ inc_expression : INC IDENTIFIER
                                 $$ = new_op();
                                 int t = new_temp();
                                 BUF_ALLOC(buf);
-                                sprintf(buf,"%s = %s + 1\n",identifiers[t].name,$2); // 有空格就会出现乱码
-                                $$->tac = copy_tac(buf);
-                                sprintf(buf,"%s = %s + 1 \n",$2,identifiers[t].name);
-                                $$->tac = cat_tac($$->tac,buf);
+                                sprintf(buf,"%s = %s + 1\n",identifiers[t].name,$2);
+                                cpy_tac($$->tac,buf);
+                                sprintf(buf,"%s = %s + 1\n",$2,identifiers[t].name);
+                                cat_tac($$->tac,buf);
                                 $$->addr = t;
                             }
 | IDENTIFIER INC
@@ -480,10 +500,10 @@ inc_expression : INC IDENTIFIER
                                 $$ = new_op();
                                 int t = new_temp();
                                 BUF_ALLOC(buf);
-                                sprintf(buf,"%s = %s \n",identifiers[t].name,$1);
-                                $$->tac = copy_tac(buf);
-                                sprintf(buf,"%s = %s + 1 \n",$1,identifiers[t].name);
-                                $$->tac = cat_tac($$->tac,buf);
+                                sprintf(buf,"%s = %s\n",identifiers[t].name,$1);
+                                cpy_tac($$->tac,buf);
+                                sprintf(buf,"%s = %s + 1\n",$1,identifiers[t].name);
+                                cat_tac($$->tac,buf);
                                 $$->addr = t;   
                             }
 
@@ -492,10 +512,10 @@ dec_expression : DEC IDENTIFIER
                                 $$ = new_op();
                                 int t = new_temp();
                                 BUF_ALLOC(buf);
-                                sprintf(buf,"%s = %s - 1 \n",identifiers[t].name,$2);
-                                $$->tac = copy_tac(buf);
-                                sprintf(buf,"%s = %s - 1 \n",$2,identifiers[t].name);
-                                $$->tac = cat_tac($$->tac,buf);
+                                sprintf(buf,"%s = %s - 1\n",identifiers[t].name,$2);
+                                cpy_tac($$->tac,buf);
+                                sprintf(buf,"%s = %s - 1\n",$2,identifiers[t].name);
+                                cat_tac($$->tac,buf);
                                 $$->addr = t;
                             }
 | IDENTIFIER DEC
@@ -503,23 +523,23 @@ dec_expression : DEC IDENTIFIER
                                 $$ = new_op();
                                 int t = new_temp();
                                 BUF_ALLOC(buf);
-                                sprintf(buf,"%s = %s \n",identifiers[t].name,$1);
-                                $$->tac = copy_tac(buf);
-                                sprintf(buf,"%s = %s - 1 \n",$1,identifiers[t].name);
-                                $$->tac = cat_tac($$->tac,buf);
+                                sprintf(buf,"%s = %s\n",identifiers[t].name,$1);
+                                cpy_tac($$->tac,buf);
+                                sprintf(buf,"%s = %s - 1\n",$1,identifiers[t].name);
+                                cat_tac($$->tac,buf);
                                 $$->addr = t;
                             }
 
 expression : inc_expression
                             {
                                 $$ = new_op();
-                                $$->tac = copy_tac($1->tac);
+                                cpy_tac($$->tac,$1->tac);
                                 $$->addr = $1->addr;
                             }
 | dec_expression
                             {
                                 $$ = new_op();
-                                $$->tac = copy_tac($1->tac);
+                                cpy_tac($$->tac,$1->tac);
                                 $$->addr = $1->addr;
                             }
 | expression '+' expression	
@@ -565,7 +585,7 @@ expression : inc_expression
 | '(' expression ')'				
                             { 
                                 $$ = new_op();
-                                $$->tac = copy_tac($2->tac);
+                                cpy_tac($$->tac,$2->tac);
                                 $$->addr = $2->addr;
                             }
 | '-' expression  %prec NEGATIVE
@@ -573,15 +593,16 @@ expression : inc_expression
                                 $$ = new_op();
                                 int t = new_temp();
                                 BUF_ALLOC(buf);
-                                sprintf(buf,"%s = -%s \n",identifiers[t].name,identifiers[$2->addr].name);
-                                $$->tac = cat_tac($2->tac,buf);
+                                sprintf(buf,"%s = -%s\n",identifiers[t].name,identifiers[$2->addr].name);
+                                cat_tac($$->tac,$2->tac);
+                                cat_tac($$->tac,buf);
                                 $$->addr = t;
                             }
 
 | call_statement
                             {
                                 $$ = new_op();
-                                $$->tac = copy_tac($1->tac);
+                                cpy_tac($$->tac,$1->tac);
                                 $$->addr = $1->addr;
                             }
 | INTEGER					

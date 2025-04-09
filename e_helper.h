@@ -1,5 +1,5 @@
 #define MAX 100
-#define BUF_SIZE 256
+#define BUF_SIZE 2048
 #define NAME_SIZE 64
 
 #define ADD 1
@@ -12,15 +12,18 @@
 #define LABEL_IFZ 2
 
 #define BUF_ALLOC(buf)                            \
-	char buf[BUF_SIZE];                       \
-    memset(buf, 0, BUF_SIZE*sizeof(char));             \
+	char buf[BUF_SIZE] = {0};                       \
 
 #define NAME_ALLOC(name)                            \
-	char name[NAME_SIZE];                       \
-    memset(name, 0, NAME_SIZE*sizeof(char));             \
+	char name[NAME_SIZE] = {0};                       \
+
+#define MALLOC_AND_SET(pointer,len,type)                        \
+	pointer = (type*)malloc((len)*sizeof(type));    \
+    memset(pointer,0,(len)*sizeof(type));                    \
+
 
 struct id{
-    char* name;
+    const char* name;
     int addr;
     int type;
     int num;
@@ -33,9 +36,9 @@ struct op{
 
 int find_identifier(const char* name,int add,int type);
 
-char* cat_tac(const char* src_1, const char* src_2);
+char* cat_tac(char* src_1, const char* src_2);
 
-char* copy_tac(const char* src);
+char* cpy_tac(char* dest, const char* src);
 
 struct op* new_op();
 
