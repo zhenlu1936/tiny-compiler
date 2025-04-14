@@ -15,7 +15,9 @@ int main()
 		b = add(a--,b);
 	}
 	if(c==b){
-		c = 5;
+		if(a!=b){
+			c = 5;
+		}
 	}	
 	return c;
 }

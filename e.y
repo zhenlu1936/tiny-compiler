@@ -153,7 +153,8 @@ parameter_list : INT IDENTIFIER
                                 find_identifier($4,ADD,INT_VAR); 
                                 BUF_ALLOC(buf);
                                 sprintf(buf,"param %s\n",$4);
-                                cpy_tac($$->tac,buf);
+                                cat_tac($$->tac,$1->tac);
+                                cat_tac($$->tac,buf);
                             }
 |                           {
                                 $$ = new_op();
@@ -337,7 +338,6 @@ return_statement : RETURN expression
                                 $$ = new_op();
                                 BUF_ALLOC(buf);
                                 sprintf(buf,"return %s\n",identifiers[$2->addr].name);
-                                //$$->tac = cat_tac($2->tac,buf);
                                 cat_tac($$->tac,$2->tac);
                                 cat_tac($$->tac,buf);
                             }
@@ -437,7 +437,7 @@ for_statement : FOR '(' assignment_statement ';' expression ';' statement_n_expr
 
                                 sprintf(buf,"goto %s\n",label_name_1);
                                 cat_tac($$->tac,buf);
-                                memset(buf,0,BUF_SIZE);
+                                sprintf(buf,"label %s\n",label_name_2);
                                 cat_tac($$->tac,buf);
                             }
 ;

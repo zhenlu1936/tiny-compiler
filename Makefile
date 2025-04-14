@@ -24,5 +24,6 @@ clean:
 
 test: e
 	./e test.c
+	make clean
 
 .PHONY: clean test
