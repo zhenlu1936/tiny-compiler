@@ -48,6 +48,13 @@
 
 #define BUF_ALLOC(buf) char buf[BUF_SIZE] = {0};
 
+#define NAME_ALLOC(name) char name[NAME_SIZE] = {0};
+
+#define NEW_LABEL(label) \
+	NAME_ALLOC(label##_name); \
+	sprintf(label##_name,"label_%d",label_amount++); \
+	struct id* label = find_identifier(label##_name, ADD, LABEL_IFZ);
+
 #define NEW_TAC_0(code, type) struct tac* code = new_tac(type, NULL, NULL, NULL)
 
 #define NEW_TAC_1(code, type, id_1) \
@@ -58,8 +65,6 @@
 
 #define NEW_TAC_3(code, type, id_1, id_2, id_3) \
 	struct tac* code = new_tac(type, id_1, id_2, id_3)
-
-#define NAME_ALLOC(name) char name[NAME_SIZE] = {0};
 
 #define MALLOC_AND_SET(pointer, len, type)         \
 	pointer = (type*)malloc((len) * sizeof(type)); \
