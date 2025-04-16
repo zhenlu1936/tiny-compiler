@@ -36,8 +36,22 @@ char* cat_tac(char* src_1, const char* src_2) {
 	return strcat(src_1, src_2);
 }
 
-char* cpy_tac(char* dest, const char* src) {
-	return 	strcpy(dest, src);
+struct op* cat_list(struct op* exp_1, struct op* exp_2){
+	struct op* stat_list = new_op();
+
+	cat_tac(stat_list->tac,exp_1->tac);
+	cat_tac(stat_list->tac,exp_2->tac);
+
+	return stat_list;
+}
+
+struct op* cpy_op(const struct op* src) {
+	struct op* nop = new_op();
+	strcpy(nop->tac, src->tac);
+	if(src->addr != NO_ADDR){
+		nop->addr = src->addr;
+	}
+	return 	nop;
 }
 
 struct op* new_op() {

@@ -2,6 +2,13 @@
 #define BUF_SIZE 4096
 #define NAME_SIZE 64
 
+#define NO_ADDR -1
+
+#define INC_HEAD 0
+#define INC_TAIL 1
+#define DEC_HEAD 2
+#define DEC_TAIL 3
+
 #define ADD 1
 #define NOT_ADD 0
 
@@ -38,7 +45,9 @@ int find_identifier(const char* name,int add,int type);
 
 char* cat_tac(char* src_1, const char* src_2);
 
-char* cpy_tac(char* dest, const char* src);
+struct op* cat_list(struct op* exp_1, struct op* exp_2);
+
+struct op* cpy_op(const struct op* src);
 
 struct op* new_op();
 

@@ -1,4 +1,5 @@
 mini/
-tac.txt
+tac.txt*
+test.c.*
 .vscode/
 e.dSYM/
