@@ -92,12 +92,12 @@ function_declaration_list : function_declaration
 function_declaration : function
                             {
                                 $$ = cpy_op($1);
-                                cat_tac($$->tac,"\n");
+                                //cat_tac($$->tac,"\n");
                             }
 | declaration 
                             {
                                 $$ = cpy_op($1);
-                                cat_tac($$->tac,"\n");
+                                //cat_tac($$->tac,"\n");
                             }
 ;
 
@@ -338,43 +338,43 @@ expression : inc_expression
                             }
 | expression '+' expression	
                             { 
-                                $$ = process_calculate($1,$3,"+");
+                                $$ = process_calculate($1,$3,TAC_PLUS);
                             }
 | expression '-' expression				
                             { 
-                                $$ = process_calculate($1,$3,"-");
+                                $$ = process_calculate($1,$3,TAC_MINUS);
                             }
 | expression '*' expression		
                             { 
-                                $$ = process_calculate($1,$3,"*");
+                                $$ = process_calculate($1,$3,TAC_MULTIPLY);
                             }		
 | expression '/' expression		
                             { 
-                                $$ = process_calculate($1,$3,"/");
+                                $$ = process_calculate($1,$3,TAC_DIVIDE);
                             }		
 | expression EQ expression				
                             { 
-                                $$ = process_calculate($1,$3,"==");
+                                $$ = process_calculate($1,$3,TAC_EQ);
                             }
 | expression NE expression				
                             { 
-                                $$ = process_calculate($1,$3,"!=");
+                                $$ = process_calculate($1,$3,TAC_NE);
                             }
 | expression LT expression			
                             { 
-                                $$ = process_calculate($1,$3,"<");
+                                $$ = process_calculate($1,$3,TAC_LT);
                             }
 | expression LE expression			
                             { 
-                                $$ = process_calculate($1,$3,"<=");
+                                $$ = process_calculate($1,$3,TAC_LE);
                             }	
 | expression GT expression			
                             { 
-                                $$ = process_calculate($1,$3,">");
+                                $$ = process_calculate($1,$3,TAC_GT);
                             }	
 | expression GE expression			
                             { 
-                                $$ = process_calculate($1,$3,">=");
+                                $$ = process_calculate($1,$3,TAC_GE);
                             }	
 | '(' expression ')'				
                             { 
