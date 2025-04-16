@@ -1,5 +1,5 @@
 #define MAX 100
-#define BUF_SIZE 2048
+#define BUF_SIZE 4096
 #define NAME_SIZE 64
 
 #define ADD 1
@@ -43,7 +43,5 @@ char* cpy_tac(char* dest, const char* src);
 struct op* new_op();
 
 int new_temp();
-
-struct op* calculate(struct op* exp_1, struct op* exp_2, const char* cal);
 
 char* format_string(const char* input);

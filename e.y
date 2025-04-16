@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "e_helper.h"
+#include "e_generator.h"
 
 extern FILE * yyin;
 extern int yylineno;
@@ -351,94 +352,23 @@ null_statement : CONTINUE
 
 if_statement : IF '(' expression ')' block
                             {
-                                $$ = new_op();
-                                NAME_ALLOC(label_name);
-                                sprintf(label_name,"label_%d",label_amount++);
-                                find_identifier(label_name,ADD,LABEL_IFZ);
-                                BUF_ALLOC(buf);
-                                sprintf(buf,"ifz %s goto %s\n",identifiers[$3->addr].name,label_name);
-                                cat_tac($$->tac,$3->tac);
-                                cat_tac($$->tac,buf);
-                                cat_tac($$->tac,$5->tac);
-                                sprintf(buf,"label %s\n",label_name);
-                                cat_tac($$->tac,buf);
+                                $$ = process_if_only($3,$5);
                             }
 | IF '(' expression ')' block ELSE block
                             {
-                                $$ = new_op();
-                                NAME_ALLOC(label_name_1);
-                                sprintf(label_name_1,"label_%d",label_amount++);
-                                find_identifier(label_name_1,ADD,LABEL_IFZ);
-                                BUF_ALLOC(buf);
-                                sprintf(buf,"ifz %s goto %s\n",identifiers[$3->addr].name,label_name_1);
-                                cat_tac($$->tac,$3->tac);
-                                cat_tac($$->tac,buf);
-                                cat_tac($$->tac,$5->tac);
-
-                                NAME_ALLOC(label_name_2);
-                                sprintf(label_name_2,"label_%d",label_amount++);
-                                find_identifier(label_name_2,ADD,LABEL_IFZ);
-                                sprintf(buf,"goto %s\n",label_name_2);
-                                cat_tac($$->tac,buf);
-                                sprintf(buf,"label %s\n",label_name_1);
-                                cat_tac($$->tac,buf);
-
-                                cat_tac($$->tac,$7->tac);
-                                sprintf(buf,"label %s\n",label_name_2);
-                                cat_tac($$->tac,buf);
+                                $$ = process_if_else($3,$5,$7);
                             }
 ;
 
 while_statement : WHILE '(' expression ')' block
                             {
-                                $$ = new_op();
-                                NAME_ALLOC(label_name_1);
-                                sprintf(label_name_1,"label_%d",label_amount++);
-                                find_identifier(label_name_1,ADD,LABEL_IFZ);
-                                NAME_ALLOC(label_name_2);
-                                sprintf(label_name_2,"label_%d",label_amount++);
-                                find_identifier(label_name_2,ADD,LABEL_IFZ);
-
-                                BUF_ALLOC(buf);
-                                sprintf(buf,"label %s\n",label_name_1);
-                                cat_tac($$->tac,buf);
-                                cat_tac($$->tac,$3->tac);
-                                sprintf(buf,"ifz %s goto %s\n",identifiers[$3->addr].name,label_name_2);
-                                cat_tac($$->tac,buf);
-                                cat_tac($$->tac,$5->tac);
-
-                                sprintf(buf,"goto %s\n",label_name_1);
-                                cat_tac($$->tac,buf);
-                                sprintf(buf,"label %s\n",label_name_2);
-                                cat_tac($$->tac,buf);
+                                $$ = process_while($3,$5);
                             }
 ;
 
 for_statement : FOR '(' assignment_statement ';' expression ';' statement_n_expression ')' block
                             {
-                                $$ = new_op();
-                                
-                                NAME_ALLOC(label_name_1);
-                                sprintf(label_name_1,"label_%d",label_amount++);
-                                find_identifier(label_name_1,ADD,LABEL_IFZ);
-                                NAME_ALLOC(label_name_2);
-                                sprintf(label_name_2,"label_%d",label_amount++);
-                                find_identifier(label_name_2,ADD,LABEL_IFZ);
-
-                                BUF_ALLOC(buf);
-                                sprintf(buf,"label %s\n",label_name_1);
-                                cat_tac($$->tac,$3->tac);
-                                cat_tac($$->tac,buf);
-                                cat_tac($$->tac,$5->tac);
-                                sprintf(buf,"ifz %s goto %s\n",identifiers[$5->addr].name,label_name_2);
-                                cat_tac($$->tac,buf);
-                                cat_tac($$->tac,$9->tac);
-                                cat_tac($$->tac,$7->tac);
-
-                                sprintf(buf,"goto %s\n",label_name_1);
-                                cat_tac($$->tac,buf);
-                                sprintf(buf,"label %s\n",label_name_2);
-                                cat_tac($$->tac,buf);
+                                $$ = process_for($3,$5,$7,$9);
                             }
 ;
 
@@ -544,43 +474,43 @@ expression : inc_expression
                             }
 | expression '+' expression	
                             { 
-                                $$ = calculate($1,$3,"+");
+                                $$ = process_calculate($1,$3,"+");
                             }
 | expression '-' expression				
                             { 
-                                $$ = calculate($1,$3,"-");
+                                $$ = process_calculate($1,$3,"-");
                             }
 | expression '*' expression		
                             { 
-                                $$ = calculate($1,$3,"*");
+                                $$ = process_calculate($1,$3,"*");
                             }		
 | expression '/' expression		
                             { 
-                                $$ = calculate($1,$3,"/");
+                                $$ = process_calculate($1,$3,"/");
                             }		
 | expression EQ expression				
                             { 
-                                $$ = calculate($1,$3,"==");
+                                $$ = process_calculate($1,$3,"==");
                             }
 | expression NE expression				
                             { 
-                                $$ = calculate($1,$3,"!=");
+                                $$ = process_calculate($1,$3,"!=");
                             }
 | expression LT expression			
                             { 
-                                $$ = calculate($1,$3,"<");
+                                $$ = process_calculate($1,$3,"<");
                             }
 | expression LE expression			
                             { 
-                                $$ = calculate($1,$3,"<=");
+                                $$ = process_calculate($1,$3,"<=");
                             }	
 | expression GT expression			
                             { 
-                                $$ = calculate($1,$3,">");
+                                $$ = process_calculate($1,$3,">");
                             }	
 | expression GE expression			
                             { 
-                                $$ = calculate($1,$3,">=");
+                                $$ = process_calculate($1,$3,">=");
                             }	
 | '(' expression ')'				
                             { 

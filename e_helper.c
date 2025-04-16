@@ -53,17 +53,6 @@ int new_temp() {
 	return find_identifier(buf, ADD, INT_TEMP);
 }
 
-struct op* calculate(struct op* exp_1, struct op* exp_2, const char* cal) {
-	struct op* exp = new_op();
-	cat_tac(exp->tac, exp_1->tac);
-	cat_tac(exp->tac, exp_2->tac);
-	exp->addr = new_temp();
-	BUF_ALLOC(buf);
-	sprintf(buf, "%s = %s %s %s\n", identifiers[exp->addr].name,
-			identifiers[exp_1->addr].name, cal, identifiers[exp_2->addr].name);
-	cat_tac(exp->tac, buf);
-	return exp;
-}
 
 char* format_string(const char* input) {
 	BUF_ALLOC(buf);

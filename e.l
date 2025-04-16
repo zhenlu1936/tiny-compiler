@@ -1,6 +1,6 @@
 %{
 #include <stdlib.h>
-#include "e.tab.h"
+#include "e.y.h"
 #include "e_helper.h"
 #define MAX 100
 
