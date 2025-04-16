@@ -122,6 +122,6 @@ struct op* process_expression_list(struct op* exp_1, struct op* exp_2) {
 
 	free(exp_1);
 	free(exp_2);
-	
+
 	return exp_list;
 }

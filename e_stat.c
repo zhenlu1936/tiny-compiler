@@ -33,7 +33,7 @@ struct op* process_variable_list(struct op* exp_1, char* name) {
 	cat_tac(variable_list->tac, buf);
 
 	free(exp_1);
-	
+
 	return variable_list;
 }
 

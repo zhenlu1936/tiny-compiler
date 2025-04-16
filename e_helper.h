@@ -36,8 +36,16 @@ struct id{
     int num;
 };
 
+struct tac{
+    int type;
+    struct id id_1;
+    struct id id_2;
+    struct id id_3;
+};
+
 struct op{
     char* tac;
+    struct tac* tacs;
     int addr;
 };
 
