@@ -88,7 +88,7 @@ struct op {
 
 struct id* find_identifier(const char* name, int add, int type);
 
-void cat_tac(struct tac* src_1, struct tac* src_2);
+void cat_tac(struct op* src_1, struct tac* src_2);
 
 struct op* cat_list(struct op* exp_1, struct op* exp_2);
 

@@ -32,8 +32,12 @@ struct id* find_identifier(const char* name, int add, int type) {
 	return &identifiers[id];
 }
 
-void cat_tac(struct tac* dest, struct tac* src) {
-	struct tac* t = dest;
+void cat_tac(struct op* dest, struct tac* src) {
+	struct tac* t = dest->code;
+	if (t == NULL) {
+		dest->code = src;
+		return;
+	}
 	while (t->next != NULL) t = t->next;
 	t->next = src;
 }
@@ -41,15 +45,15 @@ void cat_tac(struct tac* dest, struct tac* src) {
 struct op* cat_list(struct op* exp_1, struct op* exp_2) {
 	struct op* stat_list = new_op();
 
-	cat_tac(stat_list->code, exp_1->code);
-	cat_tac(stat_list->code, exp_2->code);
+	cat_tac(stat_list, exp_1->code);
+	cat_tac(stat_list, exp_2->code);
 
 	return stat_list;
 }
 
 struct op* cpy_op(const struct op* src) {
 	struct op* nop = new_op();
-	cat_tac(nop->code, src->code);
+	cat_tac(nop, src->code);
 	if (src->addr != NO_ADDR) {
 		nop->addr = src->addr;
 	}
@@ -59,7 +63,6 @@ struct op* cpy_op(const struct op* src) {
 struct op* new_op() {
 	struct op* nop;
 	MALLOC_AND_SET(nop, 1, struct op);
-	MALLOC_AND_SET(nop->code, 1, struct tac);
 	return nop;
 }
 
