@@ -12,6 +12,7 @@
 #define ADD 1
 #define NOT_ADD 0
 
+#define NO_TYPE -1
 #define INT_VAR 0
 #define INT_FUNC 1
 #define INT_TEMP 2
@@ -53,7 +54,7 @@
 #define NEW_LABEL(label) \
 	NAME_ALLOC(label##_name); \
 	sprintf(label##_name,"label_%d",label_amount++); \
-	struct id* label = find_identifier(label##_name, ADD, LABEL_IFZ);
+	struct id* label = add_identifier(label##_name, LABEL_IFZ);
 
 #define NEW_TAC_0(code, type) struct tac* code = new_tac(type, NULL, NULL, NULL)
 
@@ -96,7 +97,9 @@ struct op {
 
 void tac_init();
 
-struct id* find_identifier(const char* name, int add, int type);
+struct id* find_identifier(const char* name);
+
+struct id* add_identifier(const char* name, int type);
 
 void cat_tac(struct op* src_1, struct tac* src_2);
 

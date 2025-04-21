@@ -47,7 +47,7 @@ struct op* process_integer(int integer) {
 
 	BUF_ALLOC(buf);
 	sprintf(buf, "%d", integer);
-	struct id* var = find_identifier(buf, ADD, INT_NUM);
+	struct id* var = add_identifier(buf, INT_NUM);
 	int_exp->addr = var->addr;
 
 	return int_exp;
@@ -56,7 +56,7 @@ struct op* process_integer(int integer) {
 struct op* process_identifier(char* name) {
 	struct op* id_exp = new_op();
 
-	struct id* var = find_identifier(name, NOT_ADD, INT_VAR);
+	struct id* var = find_identifier(name);
 	id_exp->addr = var->addr;
 
 	return id_exp;
@@ -66,8 +66,8 @@ struct op* process_inc(char* name, int pos) {
 	struct op* inc_exp = new_op();
 
 	struct id* t = new_temp();
-	struct id* var = find_identifier(name, NOT_ADD, INT_VAR);
-	struct id* num = find_identifier("1", ADD, INT_NUM);
+	struct id* var = find_identifier(name);
+	struct id* num = add_identifier("1", INT_NUM);
 	if (pos == INC_HEAD) {
 		NEW_TAC_3(code_1, TAC_PLUS, t, var, num);
 		cat_tac(inc_exp, code_1);
@@ -86,8 +86,8 @@ struct op* process_dec(char* name, int pos) {
 	struct op* inc_exp = new_op();
 
 	struct id* t = new_temp();
-	struct id* var = find_identifier(name, NOT_ADD, INT_VAR);
-	struct id* num = find_identifier("1", ADD, INT_NUM);
+	struct id* var = find_identifier(name);
+	struct id* num = add_identifier("1", INT_NUM);
 	if (pos == INC_HEAD) {
 		NEW_TAC_3(code_1, TAC_MINUS, t, var, num);
 		cat_tac(inc_exp, code_1);

@@ -168,7 +168,7 @@ struct op* process_function(struct op* exp_1, struct op* exp_2,
 struct op* process_function_head(char* name) {
 	struct op* function_head = new_op();
 
-	struct id* func = find_identifier(name, ADD, INT_FUNC);
+	struct id* func = add_identifier(name, INT_FUNC);
 	NEW_TAC_1(code_1, TAC_LABEL, func);
 	NEW_TAC_0(code_2, TAC_BEGIN);
 	cat_tac(function_head, code_1);
@@ -180,7 +180,7 @@ struct op* process_function_head(char* name) {
 struct op* process_parameter_list_end(char* name) {
 	struct op* parameter = new_op();
 
-	struct id* var = find_identifier(name, ADD, INT_VAR); 
+	struct id* var = add_identifier(name, INT_VAR); 
 	NEW_TAC_1(code, TAC_PARAM, var);
 	cat_tac(parameter, code);
 
@@ -190,7 +190,7 @@ struct op* process_parameter_list_end(char* name) {
 struct op* process_parameter_list(struct op* exp_1, char* name) {
 	struct op* parameter_list = new_op();
 
-	struct id* var = find_identifier(name, ADD, INT_VAR);
+	struct id* var = add_identifier(name, INT_VAR);
 	NEW_TAC_1(code, TAC_PARAM, var);
 	cat_tac(parameter_list, exp_1->code);
 	cat_tac(parameter_list, code);

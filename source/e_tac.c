@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct id *identifiers;
+struct id* identifiers;
 int scope;
 
 int identifiers_amount;
@@ -14,12 +14,12 @@ int label_amount;
 
 void tac_init() {
 	scope = 0;
-	MALLOC_AND_SET_ZERO(identifiers,MAX,struct id);
+	MALLOC_AND_SET_ZERO(identifiers, MAX, struct id);
 	temp_amount = 0;
 	label_amount = 1;
 }
 
-struct id* find_identifier(const char* name, int add, int type) {
+static struct id* _find_identifier(const char* name, int add, int type) {
 	int has_added = 0, id = 0;
 	for (id = 0; id < MAX; id++) {
 		if (identifiers[id].name && !strcmp(name, identifiers[id].name)) {
@@ -39,6 +39,14 @@ struct id* find_identifier(const char* name, int add, int type) {
 		perror("identifier not found");
 	}
 	return &identifiers[id];
+}
+
+struct id* find_identifier(const char* name) {
+	return _find_identifier(name, NOT_ADD, NO_TYPE);
+}
+
+struct id* add_identifier(const char* name, int type) {
+	return _find_identifier(name, ADD, type);
 }
 
 void cat_tac(struct op* dest, struct tac* src) {
@@ -92,7 +100,7 @@ struct tac* new_tac(int type, struct id* id_1, struct id* id_2,
 struct id* new_temp() {
 	BUF_ALLOC(buf);
 	sprintf(buf, "t%d", temp_amount++);
-	return find_identifier(buf, ADD, INT_TEMP);
+	return add_identifier(buf, INT_TEMP);
 }
 
 const char* to_str(struct id* id) {

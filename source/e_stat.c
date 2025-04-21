@@ -14,7 +14,7 @@ extern int label_amount;
 struct op* process_variable_list_end(char* name) {
 	struct op* variable = new_op();
 
-	struct id* var = find_identifier(name, ADD, INT_VAR);
+	struct id* var = add_identifier(name, INT_VAR);
 	NEW_TAC_1(code,TAC_VAR,var);
 	cat_tac(variable, code);
 
@@ -24,7 +24,7 @@ struct op* process_variable_list_end(char* name) {
 struct op* process_variable_list(struct op* exp_1, char* name) {
 	struct op* variable_list = new_op();
 
-	struct id* var = find_identifier(name, ADD, INT_VAR);
+	struct id* var = add_identifier(name, INT_VAR);
 	NEW_TAC_1(code,TAC_VAR,var);
 	cat_tac(variable_list, exp_1->code);
 	cat_tac(variable_list, code);
@@ -134,7 +134,7 @@ struct op* process_if_else(struct op* exp_1, struct op* exp_2,
 struct op* process_call(char* name, struct op* exp_1) {
 	struct op* call_stat = new_op();
 
-	struct id* func = find_identifier(name, NOT_ADD, INT_FUNC);
+	struct id* func = find_identifier(name);
 	struct id* t = new_temp();
 	NEW_TAC_2(code,TAC_CALL,t,func);
 	cat_tac(call_stat, exp_1->code);
@@ -161,7 +161,7 @@ struct op* process_return(struct op* exp_1) {
 struct op* process_output(char* name) {
 	struct op* output_stat = new_op();
 
-	struct id* var = find_identifier(name, NOT_ADD, INT_VAR);
+	struct id* var = find_identifier(name);
 	NEW_TAC_1(code,TAC_OUTPUT,var);
 	cat_tac(output_stat, code);
 
@@ -171,7 +171,7 @@ struct op* process_output(char* name) {
 struct op* process_input(char* name) {
 	struct op* input_stat = new_op();
 
-	struct id* var = find_identifier(name, NOT_ADD, INT_VAR);
+	struct id* var = find_identifier(name);
 	NEW_TAC_1(code,TAC_INPUT,var);
 	cat_tac(input_stat, code);
 
@@ -181,7 +181,7 @@ struct op* process_input(char* name) {
 struct op* process_assign(char* name, struct op* exp_1) {
 	struct op* assign_stat = new_op();
 
-	struct id* var = find_identifier(name, NOT_ADD, INT_VAR);
+	struct id* var = find_identifier(name);
 	NEW_TAC_2(code,TAC_ASSIGN,var,&identifiers[exp_1->addr]);
 	cat_tac(assign_stat, exp_1->code);
 	cat_tac(assign_stat, code);
