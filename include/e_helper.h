@@ -70,6 +70,7 @@
 	pointer = (type*)malloc((len) * sizeof(type)); \
 	memset(pointer, 0, (len) * sizeof(type));
 
+// 符号
 struct id {
 	const char* name;
 	int num;
@@ -77,6 +78,7 @@ struct id {
 	int type;
 };
 
+// 三地址码
 struct tac {
 	int type;
 	struct tac* prev;
@@ -86,6 +88,7 @@ struct tac {
 	struct id* id_3;
 };
 
+// 表达式
 struct op {
 	struct tac* code;
 	int addr;

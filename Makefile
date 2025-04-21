@@ -1,13 +1,39 @@
-e: e_helper.c e_helper.h e_func.c e_func.h e_stat.c e_stat.h e_exp.c e_exp.h e.l e.y
-	flex -o e.l.c e.l
-	bison -d -v -o e.y.c e.y
-	gcc -o e e.l.c e.y.c e_helper.c e_func.c e_stat.c e_exp.c -g
+SRCDIR := source
+INCDIR := include
+LEX_SRC := e.l
+YACC_SRC := e.y
+TARGET := e
+
+# Source files
+SRCS := $(SRCDIR)/e_helper.c \
+        $(SRCDIR)/e_func.c   \
+        $(SRCDIR)/e_stat.c   \
+        $(SRCDIR)/e_exp.c    \
+		e_main.c
+
+# Generated files
+LEX_C := e.l.c
+YACC_C := e.y.c
+YACC_H := e.y.h
+YACC_OUT := e.y.output
+
+CFLAGS := -I$(INCDIR) -g
+LEX    := flex
+YACC   := bison
+CC     := gcc
+
+.PHONY: all clean test
+
+all: $(TARGET)
+
+$(TARGET): $(SRCS) $(LEX_SRC) $(YACC_SRC)
+	$(LEX) -o $(LEX_C) $(LEX_SRC)
+	$(YACC) -d -v -o $(YACC_C) $(YACC_SRC)
+	$(CC) $(CFLAGS) -o $@ $(LEX_C) $(YACC_C) $(SRCS)
 
 clean:
-	rm -fr e e.l.c e.y.c e.y.h e.y.output
+	rm -f $(TARGET) $(LEX_C) $(YACC_C) $(YACC_H) $(YACC_OUT)
 
-test: e
-	./e test.c
+test: all
+	./$(TARGET) test.c
 	make clean
-
-.PHONY: clean test
