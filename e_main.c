@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "e.y.h"
+#include "build/e.y.h"
 
 extern int yyparse();
 extern FILE * yyin;
