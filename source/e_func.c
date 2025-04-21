@@ -6,12 +6,6 @@
 
 #include "e_tac.h"
 
-extern struct id *identifiers;
-extern int identifiers_amount;
-extern int num_amount;
-extern int temp_amount;
-extern int label_amount;
-
 struct op *process_program(struct op *exp_1) {
 	struct op *program = cpy_op(exp_1);
 

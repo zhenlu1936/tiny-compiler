@@ -5,12 +5,6 @@
 
 #include "e_tac.h"
 
-extern struct id *identifiers;
-extern int identifiers_amount;
-extern int num_amount;
-extern int temp_amount;
-extern int label_amount;
-
 struct op *process_calculate(struct op *exp_1, struct op *exp_2, int cal) {
 	struct op *exp = new_op();
 

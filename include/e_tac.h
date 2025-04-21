@@ -51,10 +51,10 @@
 
 #define NAME_ALLOC(name) char name[NAME_SIZE] = {0};
 
-#define NEW_LABEL(label) \
-	NAME_ALLOC(label##_name); \
-	sprintf(label##_name,"label_%d",label_amount++); \
-	struct id *label = add_identifier(label##_name, LABEL_IFZ);
+// #define NEW_LABEL(label) \
+// 	NAME_ALLOC(label##_name); \
+// 	sprintf(label##_name,"label_%d",label_amount++); \
+// 	struct id *label = add_identifier(label##_name, LABEL_IFZ);
 
 #define NEW_TAC_0(code, type) struct tac *code = new_tac(type, NULL, NULL, NULL)
 
@@ -113,5 +113,7 @@ struct tac *new_tac(int type, struct id *id_1, struct id *id_2,
 					struct id *id_3);
 
 struct id *new_temp();
+
+struct id *new_label();
 
 const char *to_str(struct id *id);

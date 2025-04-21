@@ -5,12 +5,6 @@
 
 #include "e_tac.h"
 
-extern struct id *identifiers;
-extern int identifiers_amount;
-extern int num_amount;
-extern int temp_amount;
-extern int label_amount;
-
 struct op *process_variable_list_end(char *name) {
 	struct op *variable = new_op();
 
@@ -38,8 +32,8 @@ struct op *process_for(struct op *exp_1, struct op *exp_2, struct op *exp_3,
 					   struct op *exp_4) {
 	struct op *for_stat = new_op();
 
-	NEW_LABEL(label_1);
-	NEW_LABEL(label_2);
+	struct id *label_1=new_label();
+	struct id *label_2=new_label();
 
 	NEW_TAC_1(code_1,TAC_LABEL,label_1);
 	cat_tac(for_stat, exp_1->code);
@@ -66,8 +60,8 @@ struct op *process_for(struct op *exp_1, struct op *exp_2, struct op *exp_3,
 struct op *process_while(struct op *exp_1, struct op *exp_2) {
 	struct op *while_stat = new_op();
 
-	NEW_LABEL(label_1);
-	NEW_LABEL(label_2);
+	struct id *label_1=new_label();
+	struct id *label_2=new_label();
 
 	NEW_TAC_1(code_1,TAC_LABEL,label_1);
 	cat_tac(while_stat, code_1);
@@ -90,7 +84,8 @@ struct op *process_while(struct op *exp_1, struct op *exp_2) {
 struct op *process_if_only(struct op *exp_1, struct op *exp_2) {
 	struct op *if_only_stat = new_op();
 
-	NEW_LABEL(label);
+	struct id *label=new_label();
+
 	NEW_TAC_2(code_1,TAC_IFZ,exp_1->addr,label);
 	cat_tac(if_only_stat, exp_1->code);
 	cat_tac(if_only_stat, code_1);
@@ -108,13 +103,13 @@ struct op *process_if_else(struct op *exp_1, struct op *exp_2,
 						   struct op *exp_3) {
 	struct op *if_else_stat = new_op();
 
-	NEW_LABEL(label_1);
+	struct id *label_1=new_label();
 	NEW_TAC_2(code_1,TAC_IFZ,exp_1->addr,label_1);
 	cat_tac(if_else_stat, exp_1->code);
 	cat_tac(if_else_stat, code_1);
 	cat_tac(if_else_stat, exp_2->code);
 
-	NEW_LABEL(label_2);
+	struct id *label_2=new_label();
 	NEW_TAC_1(code_2,TAC_GOTO,label_2);
 	cat_tac(if_else_stat, code_2);
 	NEW_TAC_1(code_3,TAC_LABEL,label_1);

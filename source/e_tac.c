@@ -102,9 +102,15 @@ struct tac *new_tac(int type, struct id *id_1, struct id *id_2,
 }
 
 struct id *new_temp() {
-	BUF_ALLOC(buf);
+	NAME_ALLOC(buf);
 	sprintf(buf, "t%d", temp_amount++);
 	return add_identifier(buf, INT_TEMP);
+}
+
+struct id *new_label() {
+	NAME_ALLOC(label);
+	sprintf(label,"label_%d",label_amount++); \
+	return add_identifier(label, INT_TEMP);
 }
 
 const char *to_str(struct id *id) {
