@@ -129,7 +129,7 @@ struct op *process_if_else(struct op *exp_1, struct op *exp_2,
 struct op *process_call(char *name, struct op *exp_1) {
 	struct op *call_stat = new_op();
 
-	struct id *func = find_identifier(name);
+	struct id *func = find_func(name);
 	struct id *t = new_temp();
 	NEW_TAC_2(code,TAC_CALL,t,func);
 	cat_tac(call_stat, exp_1->code);

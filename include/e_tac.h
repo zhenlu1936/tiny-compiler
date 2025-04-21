@@ -9,8 +9,10 @@
 #define DEC_HEAD 2
 #define DEC_TAIL 3
 
-#define ADD 1
-#define NOT_ADD 0
+#define ADD_ID 1
+#define NOT_ADD_ID 0
+#define LOCAL_TABLE 1
+#define GLOBAL_TABLE 0
 
 #define NO_TYPE -1
 #define INT_VAR 0
@@ -35,7 +37,6 @@
 #define TAC_IDENTIFIER 14
 #define TAC_ARG 15
 #define TAC_GOTO 16
-
 #define TAC_PLUS 20
 #define TAC_MINUS 21
 #define TAC_MULTIPLY 22
@@ -67,9 +68,9 @@
 #define NEW_TAC_3(code, type, id_1, id_2, id_3) \
 	struct tac *code = new_tac(type, id_1, id_2, id_3)
 
-#define MALLOC_AND_SET_ZERO(pointer, len, type)         \
-	pointer = (type*)malloc((len)  *sizeof(type)); \
-	memset(pointer, 0, (len)  *sizeof(type));
+#define MALLOC_AND_SET_ZERO(pointer, len, type)     \
+	pointer = (type *)malloc((len) * sizeof(type)); \
+	memset(pointer, 0, (len) * sizeof(type));
 
 // 符号
 struct id {
@@ -95,9 +96,15 @@ struct op {
 	struct id *addr;
 };
 
+extern struct id *id_global, *id_local;
+extern int global_amount, local_amount;
+extern int scope;
+
 void tac_init();
 
 struct id *find_identifier(const char *name);
+
+struct id *find_func(const char *name);
 
 struct id *add_identifier(const char *name, int type);
 

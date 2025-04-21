@@ -4,26 +4,25 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct id *identifiers;
-struct id *id_global;
+struct id *id_global, *id_local;
+int global_amount, local_amount;
 int scope;
 
-int identifiers_amount;
-int num_amount;
-int temp_amount;
-int label_amount;
+static int *identifiers_amount;
+static int num_amount;
+static int temp_amount;
+static int label_amount;
 
 void tac_init() {
-	scope = 0;
+	scope = GLOBAL_TABLE;
 	MALLOC_AND_SET_ZERO(id_global, MAX, struct id);
-	identifiers = id_global;
+	MALLOC_AND_SET_ZERO(id_local, MAX, struct id);
 	temp_amount = 0;
 	label_amount = 1;
 }
 
-static struct id *_find_identifier(const char *name, int add, int type) {
-	struct id *id_table;
-	id_table = identifiers;
+static struct id *_find_identifier(const char *name, int add, int type,
+								   struct id *id_table) {
 	int has_added = 0, id = 0;
 	for (id = 0; id < MAX; id++) {
 		if (id_table[id].name && !strcmp(name, id_table[id].name)) {
@@ -32,8 +31,9 @@ static struct id *_find_identifier(const char *name, int add, int type) {
 		}
 	}
 	if (!has_added && add) {
-		id = identifiers_amount++;
-		char *id_name = (char*)malloc(sizeof(char)  *strlen(name));
+		id = *identifiers_amount;
+		*identifiers_amount += 1;
+		char *id_name = (char *)malloc(sizeof(char) * strlen(name));
 		strcpy(id_name, name);
 		id_table[id].name = id_name;
 		id_table[id].type = type;
@@ -45,12 +45,27 @@ static struct id *_find_identifier(const char *name, int add, int type) {
 	return &id_table[id];
 }
 
+static struct id *_choose_id_table(int table) {
+	if (table == GLOBAL_TABLE) {
+		identifiers_amount = &global_amount;
+		return id_global;
+	} else {
+		identifiers_amount = &local_amount;
+		return id_local;
+	}
+}
+
 struct id *find_identifier(const char *name) {
-	return _find_identifier(name, NOT_ADD, NO_TYPE);
+	return _find_identifier(name, NOT_ADD_ID, NO_TYPE, _choose_id_table(scope));
+}
+
+struct id *find_func(const char *name) {
+	return _find_identifier(name, NOT_ADD_ID, NO_TYPE,
+							_choose_id_table(GLOBAL_TABLE));
 }
 
 struct id *add_identifier(const char *name, int type) {
-	return _find_identifier(name, ADD, type);
+	return _find_identifier(name, ADD_ID, type, _choose_id_table(scope));
 }
 
 void cat_tac(struct op *dest, struct tac *src) {
@@ -89,7 +104,7 @@ struct op *new_op() {
 
 struct tac *new_tac(int type, struct id *id_1, struct id *id_2,
 					struct id *id_3) {
-	struct tac *ntac = (struct tac*)malloc(sizeof(struct tac));
+	struct tac *ntac = (struct tac *)malloc(sizeof(struct tac));
 
 	ntac->type = type;
 	ntac->next = NULL;
@@ -109,7 +124,7 @@ struct id *new_temp() {
 
 struct id *new_label() {
 	NAME_ALLOC(label);
-	sprintf(label,"label_%d",label_amount++); \
+	sprintf(label, "label_%d", label_amount++);
 	return add_identifier(label, INT_TEMP);
 }
 
