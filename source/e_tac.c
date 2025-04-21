@@ -84,6 +84,9 @@ struct op *cat_list(struct op *exp_1, struct op *exp_2) {
 	cat_tac(stat_list, exp_1->code);
 	cat_tac(stat_list, exp_2->code);
 
+	free(exp_1);
+	free(exp_2);
+
 	return stat_list;
 }
 

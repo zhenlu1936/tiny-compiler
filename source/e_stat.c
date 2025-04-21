@@ -35,8 +35,8 @@ struct op *process_for(struct op *exp_1, struct op *exp_2, struct op *exp_3,
 	struct id *label_1=new_label();
 	struct id *label_2=new_label();
 
-	NEW_TAC_1(code_1,TAC_LABEL,label_1);
 	cat_tac(for_stat, exp_1->code);
+	NEW_TAC_1(code_1,TAC_LABEL,label_1);
 	cat_tac(for_stat, code_1);
 	cat_tac(for_stat, exp_2->code);
 	NEW_TAC_2(code_2,TAC_IFZ,exp_2->addr,label_2);
@@ -86,8 +86,8 @@ struct op *process_if_only(struct op *exp_1, struct op *exp_2) {
 
 	struct id *label=new_label();
 
-	NEW_TAC_2(code_1,TAC_IFZ,exp_1->addr,label);
 	cat_tac(if_only_stat, exp_1->code);
+	NEW_TAC_2(code_1,TAC_IFZ,exp_1->addr,label);
 	cat_tac(if_only_stat, code_1);
 	cat_tac(if_only_stat, exp_2->code);
 	NEW_TAC_1(code_2,TAC_LABEL,label);
@@ -104,8 +104,8 @@ struct op *process_if_else(struct op *exp_1, struct op *exp_2,
 	struct op *if_else_stat = new_op();
 
 	struct id *label_1=new_label();
-	NEW_TAC_2(code_1,TAC_IFZ,exp_1->addr,label_1);
 	cat_tac(if_else_stat, exp_1->code);
+	NEW_TAC_2(code_1,TAC_IFZ,exp_1->addr,label_1);
 	cat_tac(if_else_stat, code_1);
 	cat_tac(if_else_stat, exp_2->code);
 

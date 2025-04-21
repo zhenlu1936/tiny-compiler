@@ -25,8 +25,8 @@ struct op *process_negative(struct op *exp_1) {
 	struct op *neg_exp = new_op();
 
 	struct id *t = new_temp();
-	NEW_TAC_2(code, TAC_NEGATIVE, t, exp_1->addr);
 	cat_tac(neg_exp, exp_1->code);
+	NEW_TAC_2(code, TAC_NEGATIVE, t, exp_1->addr);
 	cat_tac(neg_exp, code);
 	neg_exp->addr = t;
 
@@ -98,9 +98,11 @@ struct op *process_dec(char *name, int pos) {
 struct op *process_expression_list_end(struct op *exp_1) {
 	struct op *exp = new_op();
 
-	NEW_TAC_1(code, TAC_ARG, exp_1->addr);
 	cat_tac(exp, exp_1->code);
+	NEW_TAC_1(code, TAC_ARG, exp_1->addr);
 	cat_tac(exp, code);
+
+	free(exp_1);
 
 	return exp;
 }
@@ -108,9 +110,9 @@ struct op *process_expression_list_end(struct op *exp_1) {
 struct op *process_expression_list(struct op *exp_1, struct op *exp_2) {
 	struct op *exp_list = new_op();
 
-	NEW_TAC_1(code, TAC_ARG, exp_2->addr);
 	cat_tac(exp_list, exp_1->code);
 	cat_tac(exp_list, exp_2->code);
+	NEW_TAC_1(code, TAC_ARG, exp_2->addr);
 	cat_tac(exp_list, code);
 
 	free(exp_1);

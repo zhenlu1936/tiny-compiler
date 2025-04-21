@@ -164,8 +164,8 @@ struct op *process_function_head(char *name) {
 
 	struct id *func = add_identifier(name, INT_FUNC);
 	NEW_TAC_1(code_1, TAC_LABEL, func);
-	NEW_TAC_0(code_2, TAC_BEGIN);
 	cat_tac(function_head, code_1);
+	NEW_TAC_0(code_2, TAC_BEGIN);
 	cat_tac(function_head, code_2);
 
 	return function_head;
@@ -185,8 +185,8 @@ struct op *process_parameter_list(struct op *exp_1, char *name) {
 	struct op *parameter_list = new_op();
 
 	struct id *var = add_identifier(name, INT_VAR);
-	NEW_TAC_1(code, TAC_PARAM, var);
 	cat_tac(parameter_list, exp_1->code);
+	NEW_TAC_1(code, TAC_PARAM, var);
 	cat_tac(parameter_list, code);
 
 	free(exp_1);
