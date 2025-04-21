@@ -1,3 +1,4 @@
+build/
 mini/
 tac.txt*
 test.c.*
