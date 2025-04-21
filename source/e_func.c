@@ -70,7 +70,8 @@ struct op *process_program(struct op *exp_1) {
 				break;
 
 			case TAC_NEGATIVE:
-				fprintf(f, "%s = - %s\n", to_str(code->id_1), to_str(code->id_2));
+				fprintf(f, "%s = - %s\n", to_str(code->id_1),
+						to_str(code->id_2));
 				break;
 
 			case TAC_ASSIGN:
@@ -96,7 +97,7 @@ struct op *process_program(struct op *exp_1) {
 
 			case TAC_CALL:
 				if (code->id_1 == NULL)
-					fprintf(f, "call %s\n", (char*)code->id_2);
+					fprintf(f, "call %s\n", (char *)code->id_2);
 				else
 					fprintf(f, "%s = call %s\n", to_str(code->id_1),
 							to_str(code->id_2));
@@ -149,8 +150,7 @@ struct op *process_function(struct op *exp_1, struct op *exp_2,
 	cat_tac(function, exp_1->code);
 	cat_tac(function, exp_2->code);
 	cat_tac(function, exp_3->code);
-	NEW_TAC_0(code, TAC_END);
-	cat_tac(function, code);
+	cat_tac(function, NEW_TAC_0(TAC_END));
 
 	free(exp_1);
 	free(exp_2);
@@ -163,10 +163,8 @@ struct op *process_function_head(char *name) {
 	struct op *function_head = new_op();
 
 	struct id *func = add_identifier(name, INT_FUNC);
-	NEW_TAC_1(code_1, TAC_LABEL, func);
-	cat_tac(function_head, code_1);
-	NEW_TAC_0(code_2, TAC_BEGIN);
-	cat_tac(function_head, code_2);
+	cat_tac(function_head, NEW_TAC_1(TAC_LABEL, func));
+	cat_tac(function_head, NEW_TAC_0(TAC_BEGIN));
 
 	return function_head;
 }
@@ -174,9 +172,8 @@ struct op *process_function_head(char *name) {
 struct op *process_parameter_list_end(char *name) {
 	struct op *parameter = new_op();
 
-	struct id *var = add_identifier(name, INT_VAR); 
-	NEW_TAC_1(code, TAC_PARAM, var);
-	cat_tac(parameter, code);
+	struct id *var = add_identifier(name, INT_VAR);
+	cat_tac(parameter, NEW_TAC_1(TAC_PARAM, var));
 
 	return parameter;
 }
@@ -186,8 +183,7 @@ struct op *process_parameter_list(struct op *exp_1, char *name) {
 
 	struct id *var = add_identifier(name, INT_VAR);
 	cat_tac(parameter_list, exp_1->code);
-	NEW_TAC_1(code, TAC_PARAM, var);
-	cat_tac(parameter_list, code);
+	cat_tac(parameter_list, NEW_TAC_1(TAC_PARAM, var));
 
 	free(exp_1);
 

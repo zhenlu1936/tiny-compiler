@@ -12,8 +12,7 @@ struct op *process_calculate(struct op *exp_1, struct op *exp_2, int cal) {
 	cat_tac(exp, exp_2->code);
 	struct id *t = new_temp();
 	exp->addr = t;
-	NEW_TAC_3(code, cal, exp->addr, exp_1->addr, exp_2->addr);
-	cat_tac(exp, code);
+	cat_tac(exp, NEW_TAC_3(cal, exp->addr, exp_1->addr, exp_2->addr));
 
 	free(exp_1);
 	free(exp_2);
@@ -26,8 +25,7 @@ struct op *process_negative(struct op *exp_1) {
 
 	struct id *t = new_temp();
 	cat_tac(neg_exp, exp_1->code);
-	NEW_TAC_2(code, TAC_NEGATIVE, t, exp_1->addr);
-	cat_tac(neg_exp, code);
+	cat_tac(neg_exp, NEW_TAC_2(TAC_NEGATIVE, t, exp_1->addr));
 	neg_exp->addr = t;
 
 	free(exp_1);
@@ -62,14 +60,11 @@ struct op *process_inc(char *name, int pos) {
 	struct id *var = find_identifier(name);
 	struct id *num = add_identifier("1", INT_NUM);
 	if (pos == INC_HEAD) {
-		NEW_TAC_3(code_1, TAC_PLUS, t, var, num);
-		cat_tac(inc_exp, code_1);
+		cat_tac(inc_exp, NEW_TAC_3(TAC_PLUS, t, var, num));
 	} else {
-		NEW_TAC_2(code_1, TAC_ASSIGN, t, var);
-		cat_tac(inc_exp, code_1);
+		cat_tac(inc_exp, NEW_TAC_2(TAC_ASSIGN, t, var));
 	}
-	NEW_TAC_3(code_2, TAC_PLUS, var, t, num);
-	cat_tac(inc_exp, code_2);
+	cat_tac(inc_exp, NEW_TAC_3(TAC_PLUS, var, t, num));
 	inc_exp->addr = t;
 
 	return inc_exp;
@@ -82,14 +77,11 @@ struct op *process_dec(char *name, int pos) {
 	struct id *var = find_identifier(name);
 	struct id *num = add_identifier("1", INT_NUM);
 	if (pos == INC_HEAD) {
-		NEW_TAC_3(code_1, TAC_MINUS, t, var, num);
-		cat_tac(inc_exp, code_1);
+		cat_tac(inc_exp, NEW_TAC_3(TAC_MINUS, t, var, num));
 	} else {
-		NEW_TAC_2(code_1, TAC_ASSIGN, t, var);
-		cat_tac(inc_exp, code_1);
+		cat_tac(inc_exp, NEW_TAC_2(TAC_ASSIGN, t, var));
 	}
-	NEW_TAC_3(code_2, TAC_MINUS, var, t, num);
-	cat_tac(inc_exp, code_2);
+	cat_tac(inc_exp, NEW_TAC_3(TAC_MINUS, var, t, num));
 	inc_exp->addr = t;
 
 	return inc_exp;
@@ -99,8 +91,7 @@ struct op *process_expression_list_end(struct op *exp_1) {
 	struct op *exp = new_op();
 
 	cat_tac(exp, exp_1->code);
-	NEW_TAC_1(code, TAC_ARG, exp_1->addr);
-	cat_tac(exp, code);
+	cat_tac(exp, NEW_TAC_1(TAC_ARG, exp_1->addr));
 
 	free(exp_1);
 
@@ -112,8 +103,7 @@ struct op *process_expression_list(struct op *exp_1, struct op *exp_2) {
 
 	cat_tac(exp_list, exp_1->code);
 	cat_tac(exp_list, exp_2->code);
-	NEW_TAC_1(code, TAC_ARG, exp_2->addr);
-	cat_tac(exp_list, code);
+	cat_tac(exp_list, NEW_TAC_1(TAC_ARG, exp_2->addr));
 
 	free(exp_1);
 	free(exp_2);

@@ -57,16 +57,17 @@
 // 	sprintf(label##_name,"label_%d",label_amount++); \
 // 	struct id *label = add_identifier(label##_name, LABEL_IFZ);
 
-#define NEW_TAC_0(code, type) struct tac *code = new_tac(type, NULL, NULL, NULL)
+#define NEW_TAC_0(type) \
+	new_tac(type, NULL, NULL, NULL)
 
-#define NEW_TAC_1(code, type, id_1) \
-	struct tac *code = new_tac(type, id_1, NULL, NULL)
+#define NEW_TAC_1(type, id_1) \
+	new_tac(type, id_1, NULL, NULL)
 
-#define NEW_TAC_2(code, type, id_1, id_2) \
-	struct tac *code = new_tac(type, id_1, id_2, NULL)
+#define NEW_TAC_2(type, id_1, id_2) \
+	new_tac(type, id_1, id_2, NULL)
 
-#define NEW_TAC_3(code, type, id_1, id_2, id_3) \
-	struct tac *code = new_tac(type, id_1, id_2, id_3)
+#define NEW_TAC_3(type, id_1, id_2, id_3) \
+	new_tac(type, id_1, id_2, id_3)
 
 #define MALLOC_AND_SET_ZERO(pointer, len, type)     \
 	pointer = (type *)malloc((len) * sizeof(type)); \
