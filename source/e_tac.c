@@ -1,14 +1,23 @@
-#include "e_helper.h"
+#include "e_tac.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 struct id identifiers[MAX];
+int scope;
+
 int identifiers_amount;
 int num_amount;
 int temp_amount;
 int label_amount;
+
+void tac_init() {
+	scope = 0;
+	//identifiers = (struct id*)malloc(MAX * sizeof(struct id));
+	temp_amount = 0;
+	label_amount = 1;
+}
 
 struct id* find_identifier(const char* name, int add, int type) {
 	int has_added = 0, id = 0;
@@ -62,7 +71,7 @@ struct op* cpy_op(const struct op* src) {
 
 struct op* new_op() {
 	struct op* nop;
-	MALLOC_AND_SET(nop, 1, struct op);
+	MALLOC_AND_SET_ZERO(nop, 1, struct op);
 	return nop;
 }
 

@@ -4,10 +4,10 @@ INCDIR := include
 BUILDDIR := build
 
 # Sources and generated files
-SRCS := $(SRCDIR)/e_helper.c \
-        $(SRCDIR)/e_func.c   \
+SRCS := $(SRCDIR)/e_func.c   \
         $(SRCDIR)/e_stat.c   \
         $(SRCDIR)/e_exp.c    \
+		$(SRCDIR)/e_tac.c \
 		e_main.c
 LEX_SRC := e.l
 YACC_SRC := e.y
@@ -43,4 +43,4 @@ clean:
 
 test: all
 	./$(TARGET) test.c
-	$(MAKE) clean
+# $(MAKE) clean

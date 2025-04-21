@@ -66,7 +66,7 @@
 #define NEW_TAC_3(code, type, id_1, id_2, id_3) \
 	struct tac* code = new_tac(type, id_1, id_2, id_3)
 
-#define MALLOC_AND_SET(pointer, len, type)         \
+#define MALLOC_AND_SET_ZERO(pointer, len, type)         \
 	pointer = (type*)malloc((len) * sizeof(type)); \
 	memset(pointer, 0, (len) * sizeof(type));
 
@@ -93,6 +93,8 @@ struct op {
 	struct tac* code;
 	int addr;
 };
+
+void tac_init();
 
 struct id* find_identifier(const char* name, int add, int type);
 

@@ -2,12 +2,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include "build/e.y.h"
+#include "e_tac.h"
 
 extern int yyparse();
 extern FILE * yyin;
 
 int main(int argc, char *argv[]) 
 {
+	tac_init();
+	
 	if(argc!=2) 
 	{
 		printf("usage: %s filename\n", argv[0]);
