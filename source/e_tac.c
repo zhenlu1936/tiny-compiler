@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct id identifiers[MAX];
+struct id *identifiers;
 int scope;
 
 int identifiers_amount;
@@ -14,7 +14,7 @@ int label_amount;
 
 void tac_init() {
 	scope = 0;
-	//identifiers = (struct id*)malloc(MAX * sizeof(struct id));
+	MALLOC_AND_SET_ZERO(identifiers,MAX,struct id);
 	temp_amount = 0;
 	label_amount = 1;
 }

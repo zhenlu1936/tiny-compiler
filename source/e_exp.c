@@ -5,7 +5,7 @@
 
 #include "e_tac.h"
 
-extern struct id identifiers[MAX];
+extern struct id *identifiers;
 extern int identifiers_amount;
 extern int num_amount;
 extern int temp_amount;

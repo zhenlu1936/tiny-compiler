@@ -39,7 +39,7 @@ $(TARGET): $(SRCS) $(LEX_SRC) $(YACC_SRC) | $(BUILDDIR)
 	$(CC) $(CFLAGS) -o $@ $(LEX_C) $(YACC_C) $(SRCS)
 
 clean:
-	rm -rf $(BUILDDIR)
+	rm -rf $(BUILDDIR) tac.txt
 
 test: all
 	./$(TARGET) test.c
