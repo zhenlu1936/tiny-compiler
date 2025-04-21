@@ -12,17 +12,17 @@ extern int num_amount;
 extern int temp_amount;
 extern int label_amount;
 
-struct op* process_program(struct op* exp_1) {
-	struct op* program = cpy_op(exp_1);
+struct op *process_program(struct op *exp_1) {
+	struct op *program = cpy_op(exp_1);
 
-	printf("program compiled to tac!\n\n");
+	printf("program compiled to tac!\n");
 
-	FILE* f = fopen("tac.txt", "w");
+	FILE *f = fopen("tac.txt", "w");
 	if (f == NULL) {
 		perror("failed to open file");
 	}
 
-	struct tac* code = program->code;
+	struct tac *code = program->code;
 	while (code) {
 		switch (code->type) {
 			case TAC_PLUS:
@@ -148,9 +148,9 @@ struct op* process_program(struct op* exp_1) {
 	return program;
 }
 
-struct op* process_function(struct op* exp_1, struct op* exp_2,
-							struct op* exp_3) {
-	struct op* function = new_op();
+struct op *process_function(struct op *exp_1, struct op *exp_2,
+							struct op *exp_3) {
+	struct op *function = new_op();
 
 	cat_tac(function, exp_1->code);
 	cat_tac(function, exp_2->code);
@@ -165,10 +165,10 @@ struct op* process_function(struct op* exp_1, struct op* exp_2,
 	return function;
 }
 
-struct op* process_function_head(char* name) {
-	struct op* function_head = new_op();
+struct op *process_function_head(char *name) {
+	struct op *function_head = new_op();
 
-	struct id* func = add_identifier(name, INT_FUNC);
+	struct id *func = add_identifier(name, INT_FUNC);
 	NEW_TAC_1(code_1, TAC_LABEL, func);
 	NEW_TAC_0(code_2, TAC_BEGIN);
 	cat_tac(function_head, code_1);
@@ -177,20 +177,20 @@ struct op* process_function_head(char* name) {
 	return function_head;
 }
 
-struct op* process_parameter_list_end(char* name) {
-	struct op* parameter = new_op();
+struct op *process_parameter_list_end(char *name) {
+	struct op *parameter = new_op();
 
-	struct id* var = add_identifier(name, INT_VAR); 
+	struct id *var = add_identifier(name, INT_VAR); 
 	NEW_TAC_1(code, TAC_PARAM, var);
 	cat_tac(parameter, code);
 
 	return parameter;
 }
 
-struct op* process_parameter_list(struct op* exp_1, char* name) {
-	struct op* parameter_list = new_op();
+struct op *process_parameter_list(struct op *exp_1, char *name) {
+	struct op *parameter_list = new_op();
 
-	struct id* var = add_identifier(name, INT_VAR);
+	struct id *var = add_identifier(name, INT_VAR);
 	NEW_TAC_1(code, TAC_PARAM, var);
 	cat_tac(parameter_list, exp_1->code);
 	cat_tac(parameter_list, code);

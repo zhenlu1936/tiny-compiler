@@ -11,15 +11,14 @@ extern int num_amount;
 extern int temp_amount;
 extern int label_amount;
 
-struct op* process_calculate(struct op* exp_1, struct op* exp_2, int cal) {
-	struct op* exp = new_op();
+struct op *process_calculate(struct op *exp_1, struct op *exp_2, int cal) {
+	struct op *exp = new_op();
 
 	cat_tac(exp, exp_1->code);
 	cat_tac(exp, exp_2->code);
-	struct id* t = new_temp();
-	exp->addr = t->addr;
-	NEW_TAC_3(code, cal, &identifiers[exp->addr], &identifiers[exp_1->addr],
-			  &identifiers[exp_2->addr]);
+	struct id *t = new_temp();
+	exp->addr = t;
+	NEW_TAC_3(code, cal, exp->addr, exp_1->addr, exp_2->addr);
 	cat_tac(exp, code);
 
 	free(exp_1);
@@ -28,46 +27,46 @@ struct op* process_calculate(struct op* exp_1, struct op* exp_2, int cal) {
 	return exp;
 }
 
-struct op* process_negative(struct op* exp_1) {
-	struct op* neg_exp = new_op();
+struct op *process_negative(struct op *exp_1) {
+	struct op *neg_exp = new_op();
 
-	struct id* t = new_temp();
-	NEW_TAC_2(code, TAC_NEGATIVE, t, &identifiers[exp_1->addr]);
+	struct id *t = new_temp();
+	NEW_TAC_2(code, TAC_NEGATIVE, t, exp_1->addr);
 	cat_tac(neg_exp, exp_1->code);
 	cat_tac(neg_exp, code);
-	neg_exp->addr = t->addr;
+	neg_exp->addr = t;
 
 	free(exp_1);
 
 	return neg_exp;
 }
 
-struct op* process_integer(int integer) {
-	struct op* int_exp = new_op();
+struct op *process_integer(int integer) {
+	struct op *int_exp = new_op();
 
 	BUF_ALLOC(buf);
 	sprintf(buf, "%d", integer);
-	struct id* var = add_identifier(buf, INT_NUM);
-	int_exp->addr = var->addr;
+	struct id *var = add_identifier(buf, INT_NUM);
+	int_exp->addr = var;
 
 	return int_exp;
 }
 
-struct op* process_identifier(char* name) {
-	struct op* id_exp = new_op();
+struct op *process_identifier(char *name) {
+	struct op *id_exp = new_op();
 
-	struct id* var = find_identifier(name);
-	id_exp->addr = var->addr;
+	struct id *var = find_identifier(name);
+	id_exp->addr = var;
 
 	return id_exp;
 }
 
-struct op* process_inc(char* name, int pos) {
-	struct op* inc_exp = new_op();
+struct op *process_inc(char *name, int pos) {
+	struct op *inc_exp = new_op();
 
-	struct id* t = new_temp();
-	struct id* var = find_identifier(name);
-	struct id* num = add_identifier("1", INT_NUM);
+	struct id *t = new_temp();
+	struct id *var = find_identifier(name);
+	struct id *num = add_identifier("1", INT_NUM);
 	if (pos == INC_HEAD) {
 		NEW_TAC_3(code_1, TAC_PLUS, t, var, num);
 		cat_tac(inc_exp, code_1);
@@ -77,17 +76,17 @@ struct op* process_inc(char* name, int pos) {
 	}
 	NEW_TAC_3(code_2, TAC_PLUS, var, t, num);
 	cat_tac(inc_exp, code_2);
-	inc_exp->addr = t->addr;
+	inc_exp->addr = t;
 
 	return inc_exp;
 }
 
-struct op* process_dec(char* name, int pos) {
-	struct op* inc_exp = new_op();
+struct op *process_dec(char *name, int pos) {
+	struct op *inc_exp = new_op();
 
-	struct id* t = new_temp();
-	struct id* var = find_identifier(name);
-	struct id* num = add_identifier("1", INT_NUM);
+	struct id *t = new_temp();
+	struct id *var = find_identifier(name);
+	struct id *num = add_identifier("1", INT_NUM);
 	if (pos == INC_HEAD) {
 		NEW_TAC_3(code_1, TAC_MINUS, t, var, num);
 		cat_tac(inc_exp, code_1);
@@ -97,25 +96,25 @@ struct op* process_dec(char* name, int pos) {
 	}
 	NEW_TAC_3(code_2, TAC_MINUS, var, t, num);
 	cat_tac(inc_exp, code_2);
-	inc_exp->addr = t->addr;
+	inc_exp->addr = t;
 
 	return inc_exp;
 }
 
-struct op* process_expression_list_end(struct op* exp_1) {
-	struct op* exp = new_op();
+struct op *process_expression_list_end(struct op *exp_1) {
+	struct op *exp = new_op();
 
-	NEW_TAC_1(code, TAC_ARG, &identifiers[exp_1->addr]);
+	NEW_TAC_1(code, TAC_ARG, exp_1->addr);
 	cat_tac(exp, exp_1->code);
 	cat_tac(exp, code);
 
 	return exp;
 }
 
-struct op* process_expression_list(struct op* exp_1, struct op* exp_2) {
-	struct op* exp_list = new_op();
+struct op *process_expression_list(struct op *exp_1, struct op *exp_2) {
+	struct op *exp_list = new_op();
 
-	NEW_TAC_1(code, TAC_ARG, &identifiers[exp_2->addr]);
+	NEW_TAC_1(code, TAC_ARG, exp_2->addr);
 	cat_tac(exp_list, exp_1->code);
 	cat_tac(exp_list, exp_2->code);
 	cat_tac(exp_list, code);

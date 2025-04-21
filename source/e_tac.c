@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct id* identifiers;
-struct id* id_global;
+struct id *identifiers;
+struct id *id_global;
 int scope;
 
 int identifiers_amount;
@@ -21,8 +21,8 @@ void tac_init() {
 	label_amount = 1;
 }
 
-static struct id* _find_identifier(const char* name, int add, int type) {
-	struct id* id_table;
+static struct id *_find_identifier(const char *name, int add, int type) {
+	struct id *id_table;
 	id_table = identifiers;
 	int has_added = 0, id = 0;
 	for (id = 0; id < MAX; id++) {
@@ -33,7 +33,7 @@ static struct id* _find_identifier(const char* name, int add, int type) {
 	}
 	if (!has_added && add) {
 		id = identifiers_amount++;
-		char* id_name = (char*)malloc(sizeof(char) * strlen(name));
+		char *id_name = (char*)malloc(sizeof(char)  *strlen(name));
 		strcpy(id_name, name);
 		id_table[id].name = id_name;
 		id_table[id].type = type;
@@ -45,16 +45,16 @@ static struct id* _find_identifier(const char* name, int add, int type) {
 	return &id_table[id];
 }
 
-struct id* find_identifier(const char* name) {
+struct id *find_identifier(const char *name) {
 	return _find_identifier(name, NOT_ADD, NO_TYPE);
 }
 
-struct id* add_identifier(const char* name, int type) {
+struct id *add_identifier(const char *name, int type) {
 	return _find_identifier(name, ADD, type);
 }
 
-void cat_tac(struct op* dest, struct tac* src) {
-	struct tac* t = dest->code;
+void cat_tac(struct op *dest, struct tac *src) {
+	struct tac *t = dest->code;
 	if (t == NULL) {
 		dest->code = src;
 		return;
@@ -63,8 +63,8 @@ void cat_tac(struct op* dest, struct tac* src) {
 	t->next = src;
 }
 
-struct op* cat_list(struct op* exp_1, struct op* exp_2) {
-	struct op* stat_list = new_op();
+struct op *cat_list(struct op *exp_1, struct op *exp_2) {
+	struct op *stat_list = new_op();
 
 	cat_tac(stat_list, exp_1->code);
 	cat_tac(stat_list, exp_2->code);
@@ -72,24 +72,24 @@ struct op* cat_list(struct op* exp_1, struct op* exp_2) {
 	return stat_list;
 }
 
-struct op* cpy_op(const struct op* src) {
-	struct op* nop = new_op();
+struct op *cpy_op(const struct op *src) {
+	struct op *nop = new_op();
 	cat_tac(nop, src->code);
-	if (src->addr != NO_ADDR) {
+	if (src->addr != NULL) {
 		nop->addr = src->addr;
 	}
 	return nop;
 }
 
-struct op* new_op() {
-	struct op* nop;
+struct op *new_op() {
+	struct op *nop;
 	MALLOC_AND_SET_ZERO(nop, 1, struct op);
 	return nop;
 }
 
-struct tac* new_tac(int type, struct id* id_1, struct id* id_2,
-					struct id* id_3) {
-	struct tac* ntac = (struct tac*)malloc(sizeof(struct tac));
+struct tac *new_tac(int type, struct id *id_1, struct id *id_2,
+					struct id *id_3) {
+	struct tac *ntac = (struct tac*)malloc(sizeof(struct tac));
 
 	ntac->type = type;
 	ntac->next = NULL;
@@ -101,13 +101,13 @@ struct tac* new_tac(int type, struct id* id_1, struct id* id_2,
 	return ntac;
 }
 
-struct id* new_temp() {
+struct id *new_temp() {
 	BUF_ALLOC(buf);
 	sprintf(buf, "t%d", temp_amount++);
 	return add_identifier(buf, INT_TEMP);
 }
 
-const char* to_str(struct id* id) {
+const char *to_str(struct id *id) {
 	if (id == NULL) return "NULL";
 
 	switch (id->type) {

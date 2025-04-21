@@ -54,26 +54,26 @@
 #define NEW_LABEL(label) \
 	NAME_ALLOC(label##_name); \
 	sprintf(label##_name,"label_%d",label_amount++); \
-	struct id* label = add_identifier(label##_name, LABEL_IFZ);
+	struct id *label = add_identifier(label##_name, LABEL_IFZ);
 
-#define NEW_TAC_0(code, type) struct tac* code = new_tac(type, NULL, NULL, NULL)
+#define NEW_TAC_0(code, type) struct tac *code = new_tac(type, NULL, NULL, NULL)
 
 #define NEW_TAC_1(code, type, id_1) \
-	struct tac* code = new_tac(type, id_1, NULL, NULL)
+	struct tac *code = new_tac(type, id_1, NULL, NULL)
 
 #define NEW_TAC_2(code, type, id_1, id_2) \
-	struct tac* code = new_tac(type, id_1, id_2, NULL)
+	struct tac *code = new_tac(type, id_1, id_2, NULL)
 
 #define NEW_TAC_3(code, type, id_1, id_2, id_3) \
-	struct tac* code = new_tac(type, id_1, id_2, id_3)
+	struct tac *code = new_tac(type, id_1, id_2, id_3)
 
 #define MALLOC_AND_SET_ZERO(pointer, len, type)         \
-	pointer = (type*)malloc((len) * sizeof(type)); \
-	memset(pointer, 0, (len) * sizeof(type));
+	pointer = (type*)malloc((len)  *sizeof(type)); \
+	memset(pointer, 0, (len)  *sizeof(type));
 
 // 符号
 struct id {
-	const char* name;
+	const char *name;
 	int num;
 	int addr;
 	int type;
@@ -82,36 +82,36 @@ struct id {
 // 三地址码
 struct tac {
 	int type;
-	struct tac* prev;
-	struct tac* next;
-	struct id* id_1;
-	struct id* id_2;
-	struct id* id_3;
+	struct tac *prev;
+	struct tac *next;
+	struct id *id_1;
+	struct id *id_2;
+	struct id *id_3;
 };
 
 // 表达式
 struct op {
-	struct tac* code;
-	int addr;
+	struct tac *code;
+	struct id *addr;
 };
 
 void tac_init();
 
-struct id* find_identifier(const char* name);
+struct id *find_identifier(const char *name);
 
-struct id* add_identifier(const char* name, int type);
+struct id *add_identifier(const char *name, int type);
 
-void cat_tac(struct op* src_1, struct tac* src_2);
+void cat_tac(struct op *src_1, struct tac *src_2);
 
-struct op* cat_list(struct op* exp_1, struct op* exp_2);
+struct op *cat_list(struct op *exp_1, struct op *exp_2);
 
-struct op* cpy_op(const struct op* src);
+struct op *cpy_op(const struct op *src);
 
-struct op* new_op();
+struct op *new_op();
 
-struct tac* new_tac(int type, struct id* id_1, struct id* id_2,
-					struct id* id_3);
+struct tac *new_tac(int type, struct id *id_1, struct id *id_2,
+					struct id *id_3);
 
-struct id* new_temp();
+struct id *new_temp();
 
-const char* to_str(struct id* id);
+const char *to_str(struct id *id);
