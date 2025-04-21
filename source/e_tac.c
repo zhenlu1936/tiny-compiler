@@ -5,6 +5,7 @@
 #include <string.h>
 
 struct id* identifiers;
+struct id* id_global;
 int scope;
 
 int identifiers_amount;
@@ -14,15 +15,18 @@ int label_amount;
 
 void tac_init() {
 	scope = 0;
-	MALLOC_AND_SET_ZERO(identifiers, MAX, struct id);
+	MALLOC_AND_SET_ZERO(id_global, MAX, struct id);
+	identifiers = id_global;
 	temp_amount = 0;
 	label_amount = 1;
 }
 
 static struct id* _find_identifier(const char* name, int add, int type) {
+	struct id* id_table;
+	id_table = identifiers;
 	int has_added = 0, id = 0;
 	for (id = 0; id < MAX; id++) {
-		if (identifiers[id].name && !strcmp(name, identifiers[id].name)) {
+		if (id_table[id].name && !strcmp(name, id_table[id].name)) {
 			has_added = 1;
 			break;
 		}
@@ -31,14 +35,14 @@ static struct id* _find_identifier(const char* name, int add, int type) {
 		id = identifiers_amount++;
 		char* id_name = (char*)malloc(sizeof(char) * strlen(name));
 		strcpy(id_name, name);
-		identifiers[id].name = id_name;
-		identifiers[id].type = type;
-		identifiers[id].addr = id;
+		id_table[id].name = id_name;
+		id_table[id].type = type;
+		id_table[id].addr = id;
 	}
 	if (id == MAX) {
 		perror("identifier not found");
 	}
-	return &identifiers[id];
+	return &id_table[id];
 }
 
 struct id* find_identifier(const char* name) {
