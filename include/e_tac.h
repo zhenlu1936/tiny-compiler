@@ -10,7 +10,7 @@
 #define DEC_TAIL 3
 
 #define ADD_ID 1
-#define NOT_ADD_ID 0
+#define FIND_ID 0
 #define LOCAL_TABLE 1
 #define GLOBAL_TABLE 0
 
@@ -77,8 +77,8 @@
 struct id {
 	const char *name;
 	int num;
-	int addr;
 	int type;
+	struct id *next;
 };
 
 // 三地址码
