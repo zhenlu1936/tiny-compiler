@@ -70,6 +70,9 @@ void yyerror(char* msg);
 
 %%
 
+/**************************************/
+/**************** func ****************/
+/**************************************/
 program : function_declaration_list
                             {
                                 $$ = process_program($1);
@@ -88,12 +91,10 @@ function_declaration_list : function_declaration
 function_declaration : function
                             {
                                 $$ = cpy_op_and_free($1);
-                                //cat_tac($$->tac,"\n");
                             }
 | declaration 
                             {
                                 $$ = cpy_op_and_free($1);
-                                //cat_tac($$->tac,"\n");
                             }
 ;
 
@@ -127,6 +128,9 @@ parameter_list : INT IDENTIFIER
                             }
 ;
 
+/**************************************/
+/**************** stat ****************/
+/**************************************/
 block: '{' declaration_list statement_list '}'					
                             {
                                 $$ = cat_list_and_free($2,$3);
@@ -315,6 +319,9 @@ argument_list  :
                             }
 ;
 
+/*************************************/
+/**************** exp ****************/
+/*************************************/
 expression_list : expression
                             {
                                 $$ = process_expression_list_end($1);

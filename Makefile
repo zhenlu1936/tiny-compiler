@@ -1,17 +1,17 @@
 # Directories
-SRCDIR := source
-INCDIR := include
+SRCDIR := src
+INCDIR := $(SRCDIR)/include
 BUILDDIR := build
-EXAMPLEDIR := example
+TESTDIR := test
 
 # Sources and generated files
 SRCS := $(SRCDIR)/e_func.c   \
         $(SRCDIR)/e_stat.c   \
         $(SRCDIR)/e_exp.c    \
-		$(SRCDIR)/e_tac.c \
-		e_main.c
-LEX_SRC := e.l
-YACC_SRC := e.y
+		$(SRCDIR)/e_tac.c    \
+		$(SRCDIR)/e_main.c	 
+LEX_SRC := $(SRCDIR)/e.l
+YACC_SRC := $(SRCDIR)/e.y
 
 # Build outputs
 LEX_C := $(BUILDDIR)/e.l.c
@@ -43,5 +43,5 @@ clean:
 	rm -rf $(BUILDDIR) tac.txt
 
 test: all
-	./$(TARGET) ./$(EXAMPLEDIR)/test.c
+	./$(TARGET) ./$(TESTDIR)/test.c
 # $(MAKE) clean

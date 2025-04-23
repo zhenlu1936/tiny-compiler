@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "build/e.y.h"
 #include "e_tac.h"
 
 extern int yyparse();
