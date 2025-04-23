@@ -10,12 +10,6 @@ static struct id *id_global, *id_local;
 static int temp_amount;
 static int label_amount;
 
-void tac_init() {
-	scope = GLOBAL_TABLE;
-	temp_amount = 1;
-	label_amount = 1;
-}
-
 static struct id *_find_identifier(const char *name, struct id **id_table) {
 	int has_finded = 0;
 	struct id *id_wanted;
@@ -69,6 +63,27 @@ struct id *find_func(const char *name) {
 
 struct id *add_identifier(const char *name, int type) {
 	return _add_identifier(name, type, _choose_id_table(scope));
+}
+
+void tac_init() {
+	scope = GLOBAL_TABLE;
+	id_global = NULL;
+	id_local = NULL;
+	temp_amount = 1;
+	label_amount = 1;
+}
+
+void clear_table(int scope) {
+	struct id **table = _choose_id_table(scope);
+	struct id *head = *table;
+	struct id *cur = head;
+	// 不能直接释放，因为后面输出tac.txt的时候必定要用到id的地址
+	// while (head) {
+	// 	head = cur->next;
+	// 	free(cur);
+	// 	cur = head;
+	// }
+	*table = NULL;
 }
 
 void cat_tac(struct op *dest, struct tac *src) {

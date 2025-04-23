@@ -101,6 +101,8 @@ extern int scope;
 
 void tac_init();
 
+void clear_table(int scope);
+
 struct id *find_identifier(const char *name);
 
 struct id *find_func(const char *name);

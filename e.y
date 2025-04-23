@@ -104,6 +104,7 @@ function_declaration : function
 function : function_head '(' parameter_list ')' block
                             {
                                 $$ = process_function($1,$3,$5);
+	                            clear_table(scope); /* Clear local symbol table. */
                                 scope = GLOBAL_TABLE;
                             }
 | error {}
@@ -111,9 +112,9 @@ function : function_head '(' parameter_list ')' block
 
 function_head : INT IDENTIFIER
                             {
-	                            // MALLOC_AND_SET_ZERO(id_local, MAX, struct id);
                                 $$ = process_function_head($2);
                                 scope = LOCAL_TABLE;
+	                            // clear_table(scope); /* Clear local symbol table. */
                             }
 ;
 
