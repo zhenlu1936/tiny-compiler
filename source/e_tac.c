@@ -12,7 +12,7 @@ static int label_amount;
 
 void tac_init() {
 	scope = GLOBAL_TABLE;
-	temp_amount = 0;
+	temp_amount = 1;
 	label_amount = 1;
 }
 
@@ -75,13 +75,13 @@ void cat_tac(struct op *dest, struct tac *src) {
 	struct tac *t = dest->code;
 	if (t == NULL) {
 		dest->code = src;
-		return;
+	} else {
+		while (t->next != NULL) t = t->next;
+		t->next = src;
 	}
-	while (t->next != NULL) t = t->next;
-	t->next = src;
 }
 
-// 和cat_tac不同之处在于释放了src
+// 和cat_tac不同之处在于，释放了作为struct op的src
 void cat_op_and_free(struct op *dest, struct op *src) {
 	cat_tac(dest, src->code);
 	free(src);
@@ -90,16 +90,13 @@ void cat_op_and_free(struct op *dest, struct op *src) {
 struct op *cat_list_and_free(struct op *exp_1, struct op *exp_2) {
 	struct op *stat_list = new_op();
 
-	cat_tac(stat_list, exp_1->code);
-	cat_tac(stat_list, exp_2->code);
-
-	free(exp_1);
-	free(exp_2);
+	cat_op_and_free(stat_list, exp_1);
+	cat_op_and_free(stat_list, exp_2);
 
 	return stat_list;
 }
 
-struct op *cpy_op(const struct op *src) {
+static struct op *cpy_op(const struct op *src) {
 	struct op *nop = new_op();
 	cat_tac(nop, src->code);
 	if (src->addr != NULL) {
@@ -108,13 +105,12 @@ struct op *cpy_op(const struct op *src) {
 	return nop;
 }
 
+// 目前来看，并不需要复制再释放的操作，只需要把指针本身复制给dest
 struct op *cpy_op_and_free(struct op *src) {
-	struct op *nop = new_op();
-	if (src->addr != NULL) {
-		nop->addr = src->addr;
-	}
-	cat_op_and_free(nop, src);
-	return nop;
+	// struct op *nop = cpy_op(src);
+	// free(src);
+	// return nop;
+	return src;
 }
 
 struct op *new_op() {
