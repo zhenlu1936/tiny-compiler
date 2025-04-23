@@ -12,6 +12,12 @@
 
 "int"  {  return INT;  }
 
+"long"  {  return LONG;  }
+
+"float"  {  return FLOAT;  }
+
+"double"  {  return DOUBLE;  }
+
 "input"  {  return INPUT;  }
 
 "output"  {  return OUTPUT;  }

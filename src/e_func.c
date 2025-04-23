@@ -15,7 +15,7 @@ struct op *process_program(struct op *exp_1) {
 	if (f == NULL) {
 		perror("failed to open file");
 	}
-	output_tac(f,program->code);
+	output_tac(f, program->code);
 
 	// clear_table(GLOBAL_TABLE);
 	// clear_table(LOCAL_TABLE);
@@ -35,29 +35,29 @@ struct op *process_function(struct op *exp_1, struct op *exp_2,
 	return function;
 }
 
-struct op *process_function_head(char *name) {
+struct op *process_function_head(int data_type, char *name) {
 	struct op *function_head = new_op();
 
-	struct id *func = add_identifier(name, INT_FUNC);
+	struct id *func = add_identifier(name, ID_FUNC, data_type);
 	cat_tac(function_head, NEW_TAC_1(TAC_LABEL, func));
 	cat_tac(function_head, NEW_TAC_0(TAC_BEGIN));
 
 	return function_head;
 }
 
-struct op *process_parameter_list_end(char *name) {
+struct op *process_parameter_list_end(int data_type, char *name) {
 	struct op *parameter = new_op();
 
-	struct id *var = add_identifier(name, INT_VAR);
+	struct id *var = add_identifier(name, ID_VAR, data_type);
 	cat_tac(parameter, NEW_TAC_1(TAC_PARAM, var));
 
 	return parameter;
 }
 
-struct op *process_parameter_list(struct op *exp_1, char *name) {
+struct op *process_parameter_list(struct op *exp_1, int data_type, char *name) {
 	struct op *parameter_list = new_op();
 
-	struct id *var = add_identifier(name, INT_VAR);
+	struct id *var = add_identifier(name, ID_VAR, data_type);
 	cat_op_and_free(parameter_list, exp_1);
 	cat_tac(parameter_list, NEW_TAC_1(TAC_PARAM, var));
 

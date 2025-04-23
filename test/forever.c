@@ -1,5 +1,5 @@
 int main() {
-	int a;
+	float a;
 	for (;;) {
 		a = a + 1;
 	}

@@ -5,10 +5,23 @@
 
 #include "e_tac.h"
 
+struct op *process_declaration(int data_type, struct op *exp_1) {
+	struct op *declaration = new_op();
+
+	struct tac *head = exp_1->code;
+	while (head) {
+		head->id_1->data_type = data_type;
+		head = head->next;
+	}
+	cat_op_and_free(declaration, exp_1);
+
+	return declaration;
+}
+
 struct op *process_variable_list_end(char *name) {
 	struct op *variable = new_op();
 
-	struct id *var = add_identifier(name, INT_VAR);
+	struct id *var = add_identifier(name, ID_VAR, NO_TYPE);
 
 	cat_tac(variable, NEW_TAC_1(TAC_VAR, var));
 
@@ -18,7 +31,7 @@ struct op *process_variable_list_end(char *name) {
 struct op *process_variable_list(struct op *exp_1, char *name) {
 	struct op *variable_list = new_op();
 
-	struct id *var = add_identifier(name, INT_VAR);
+	struct id *var = add_identifier(name, ID_VAR, NO_TYPE);
 
 	cat_op_and_free(variable_list, exp_1);
 	cat_tac(variable_list, NEW_TAC_1(TAC_VAR, var));
@@ -137,7 +150,7 @@ struct op *process_output_variable(char *name) {
 struct op *process_output_text(char *string) {
 	struct op *output_stat = new_op();
 
-	struct id *str = add_identifier(string, STRING);
+	struct id *str = add_identifier(string, ID_STRING, NO_DATA);
 
 	cat_tac(output_stat, NEW_TAC_1(TAC_OUTPUT, str));
 

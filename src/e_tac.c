@@ -30,7 +30,7 @@ static struct id *_find_identifier(const char *name, struct id **id_table) {
 	return id_wanted;
 }
 
-static struct id *_add_identifier(const char *name, int type,
+static struct id *_add_identifier(const char *name, int id_type, int data_type,
 								  struct id **id_table) {
 	struct id *id_wanted;
 
@@ -38,7 +38,7 @@ static struct id *_add_identifier(const char *name, int type,
 	char *id_name = (char *)malloc(sizeof(char) * strlen(name));
 	strcpy(id_name, name);
 	id_wanted->name = id_name;
-	id_wanted->type = type;
+	id_wanted->id_type = id_type;
 	id_wanted->next = *id_table;
 	*id_table = id_wanted;
 
@@ -61,8 +61,8 @@ struct id *find_func(const char *name) {
 	return _find_identifier(name, _choose_id_table(GLOBAL_TABLE));
 }
 
-struct id *add_identifier(const char *name, int type) {
-	return _add_identifier(name, type, _choose_id_table(scope));
+struct id *add_identifier(const char *name, int id_type, int data_type) {
+	return _add_identifier(name, id_type, data_type, _choose_id_table(scope));
 }
 
 void tac_init() {
@@ -143,6 +143,12 @@ struct op *new_op() {
 	return nop;
 }
 
+// struct var_list *new_var_list() {
+// 	struct var_list *varl;
+// 	MALLOC_AND_SET_ZERO(varl, 1, struct var_list);
+// 	return varl;
+// }
+
 struct tac *new_tac(int type, struct id *id_1, struct id *id_2,
 					struct id *id_3) {
 	struct tac *ntac = (struct tac *)malloc(sizeof(struct tac));
@@ -160,25 +166,25 @@ struct tac *new_tac(int type, struct id *id_1, struct id *id_2,
 struct id *new_temp() {
 	NAME_ALLOC(buf);
 	sprintf(buf, "t%d", temp_amount++);
-	return add_identifier(buf, INT_TEMP);
+	return add_identifier(buf, ID_TEMP, DATA_INT);
 }
 
 struct id *new_label() {
 	NAME_ALLOC(label);
 	sprintf(label, "label_%d", label_amount++);
-	return add_identifier(label, INT_TEMP);
+	return add_identifier(label, ID_TEMP, NO_DATA);
 }
 
-const char *to_str(struct id *id) {
+const char *id_to_str(struct id *id) {
 	if (id == NULL) return "NULL";
 
-	switch (id->type) {
-		case INT_VAR:
-		case INT_FUNC:
-		case INT_TEMP:
-		case INT_NUM:
-		case LABEL_IFZ:
-		case STRING:
+	switch (id->id_type) {
+		case ID_VAR:
+		case ID_FUNC:
+		case ID_TEMP:
+		case ID_NUM:
+		case ID_LABEL:
+		case ID_STRING:
 			return id->name;
 
 		default:
@@ -187,66 +193,87 @@ const char *to_str(struct id *id) {
 	}
 }
 
+const char *data_to_str(int type) {
+	if (type == NO_TYPE) return "NULL";
+
+	switch (type) {
+		case DATA_INT:
+			return "int";
+		case DATA_LONG:
+			return "long";
+		case DATA_FLOAT:
+			return "float";
+		case DATA_DOUBLE:
+			return "double";
+
+		default:
+			perror("unknown data type");
+			printf("id type: %d\n",type);
+			return "?";
+	}
+}
+
 void output_tac(FILE *f, struct tac *code) {
 	while (code) {
 		switch (code->type) {
 			case TAC_PLUS:
-				fprintf(f, "%s = %s + %s\n", to_str(code->id_1),
-						to_str(code->id_2), to_str(code->id_3));
+				fprintf(f, "%s = %s + %s\n", id_to_str(code->id_1),
+						id_to_str(code->id_2), id_to_str(code->id_3));
 				break;
 
 			case TAC_MINUS:
-				fprintf(f, "%s = %s - %s\n", to_str(code->id_1),
-						to_str(code->id_2), to_str(code->id_3));
+				fprintf(f, "%s = %s - %s\n", id_to_str(code->id_1),
+						id_to_str(code->id_2), id_to_str(code->id_3));
 				break;
 
 			case TAC_MULTIPLY:
-				fprintf(f, "%s = %s * %s\n", to_str(code->id_1),
-						to_str(code->id_2), to_str(code->id_3));
+				fprintf(f, "%s = %s * %s\n", id_to_str(code->id_1),
+						id_to_str(code->id_2), id_to_str(code->id_3));
 				break;
 
 			case TAC_DIVIDE:
-				fprintf(f, "%s = %s / %s\n", to_str(code->id_1),
-						to_str(code->id_2), to_str(code->id_3));
+				fprintf(f, "%s = %s / %s\n", id_to_str(code->id_1),
+						id_to_str(code->id_2), id_to_str(code->id_3));
 				break;
 
 			case TAC_EQ:
-				fprintf(f, "%s = (%s == %s)\n", to_str(code->id_1),
-						to_str(code->id_2), to_str(code->id_3));
+				fprintf(f, "%s = (%s == %s)\n", id_to_str(code->id_1),
+						id_to_str(code->id_2), id_to_str(code->id_3));
 				break;
 
 			case TAC_NE:
-				fprintf(f, "%s = (%s != %s)\n", to_str(code->id_1),
-						to_str(code->id_2), to_str(code->id_3));
+				fprintf(f, "%s = (%s != %s)\n", id_to_str(code->id_1),
+						id_to_str(code->id_2), id_to_str(code->id_3));
 				break;
 
 			case TAC_LT:
-				fprintf(f, "%s = (%s < %s)\n", to_str(code->id_1),
-						to_str(code->id_2), to_str(code->id_3));
+				fprintf(f, "%s = (%s < %s)\n", id_to_str(code->id_1),
+						id_to_str(code->id_2), id_to_str(code->id_3));
 				break;
 
 			case TAC_LE:
-				fprintf(f, "%s = (%s <= %s)\n", to_str(code->id_1),
-						to_str(code->id_2), to_str(code->id_3));
+				fprintf(f, "%s = (%s <= %s)\n", id_to_str(code->id_1),
+						id_to_str(code->id_2), id_to_str(code->id_3));
 				break;
 
 			case TAC_GT:
-				fprintf(f, "%s = (%s > %s)\n", to_str(code->id_1),
-						to_str(code->id_2), to_str(code->id_3));
+				fprintf(f, "%s = (%s > %s)\n", id_to_str(code->id_1),
+						id_to_str(code->id_2), id_to_str(code->id_3));
 				break;
 
 			case TAC_GE:
-				fprintf(f, "%s = (%s >= %s)\n", to_str(code->id_1),
-						to_str(code->id_2), to_str(code->id_3));
+				fprintf(f, "%s = (%s >= %s)\n", id_to_str(code->id_1),
+						id_to_str(code->id_2), id_to_str(code->id_3));
 				break;
 
 			case TAC_NEGATIVE:
-				fprintf(f, "%s = - %s\n", to_str(code->id_1),
-						to_str(code->id_2));
+				fprintf(f, "%s = - %s\n", id_to_str(code->id_1),
+						id_to_str(code->id_2));
 				break;
 
 			case TAC_ASSIGN:
-				fprintf(f, "%s = %s\n", to_str(code->id_1), to_str(code->id_2));
+				fprintf(f, "%s = %s\n", id_to_str(code->id_1),
+						id_to_str(code->id_2));
 				break;
 
 			case TAC_GOTO:
@@ -254,44 +281,45 @@ void output_tac(FILE *f, struct tac *code) {
 				break;
 
 			case TAC_IFZ:
-				fprintf(f, "ifz %s goto %s\n", to_str(code->id_1),
+				fprintf(f, "ifz %s goto %s\n", id_to_str(code->id_1),
 						code->id_2->name);
 				break;
 
 			case TAC_ARG:
-				fprintf(f, "arg %s\n", to_str(code->id_1));
+				fprintf(f, "arg %s\n", id_to_str(code->id_1));
 				break;
 
 			case TAC_PARAM:
-				fprintf(f, "param %s\n", to_str(code->id_1));
+				fprintf(f, "param %s\n", id_to_str(code->id_1));
 				break;
 
 			case TAC_CALL:
 				if (code->id_1 == NULL)
 					fprintf(f, "call %s\n", (char *)code->id_2);
 				else
-					fprintf(f, "%s = call %s\n", to_str(code->id_1),
-							to_str(code->id_2));
+					fprintf(f, "%s = call %s\n", id_to_str(code->id_1),
+							id_to_str(code->id_2));
 				break;
 
 			case TAC_INPUT:
-				fprintf(f, "input %s\n", to_str(code->id_1));
+				fprintf(f, "input %s\n", id_to_str(code->id_1));
 				break;
 
 			case TAC_OUTPUT:
-				fprintf(f, "output %s\n", to_str(code->id_1));
+				fprintf(f, "output %s\n", id_to_str(code->id_1));
 				break;
 
 			case TAC_RETURN:
-				fprintf(f, "return %s\n", to_str(code->id_1));
+				fprintf(f, "return %s\n", id_to_str(code->id_1));
 				break;
 
 			case TAC_LABEL:
-				fprintf(f, "label %s\n", to_str(code->id_1));
+				fprintf(f, "label %s\n", id_to_str(code->id_1));
 				break;
 
 			case TAC_VAR:
-				fprintf(f, "var %s\n", to_str(code->id_1));
+				fprintf(f, "var %s %s\n", data_to_str(code->id_1->data_type),
+						id_to_str(code->id_1));
 				break;
 
 			case TAC_BEGIN:

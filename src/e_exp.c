@@ -38,7 +38,7 @@ struct op *process_integer(int integer) {
 
 	BUF_ALLOC(buf);
 	sprintf(buf, "%d", integer);
-	struct id *var = add_identifier(buf, INT_NUM);
+	struct id *var = add_identifier(buf, ID_NUM, NO_DATA);
 	int_exp->addr = var;
 
 	return int_exp;
@@ -58,7 +58,7 @@ struct op *process_inc(char *name, int pos) {
 
 	struct id *t = new_temp();
 	struct id *var = find_identifier(name);
-	struct id *num = add_identifier("1", INT_NUM);
+	struct id *num = add_identifier("1", ID_NUM, NO_DATA);
 	inc_exp->addr = t;
 
 	if (pos == INC_HEAD) {
@@ -76,7 +76,7 @@ struct op *process_dec(char *name, int pos) {
 
 	struct id *t = new_temp();
 	struct id *var = find_identifier(name);
-	struct id *num = add_identifier("1", INT_NUM);
+	struct id *num = add_identifier("1", ID_NUM, NO_DATA);
 	dec_exp->addr = t;
 
 	if (pos == INC_HEAD) {

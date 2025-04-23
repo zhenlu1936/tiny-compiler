@@ -20,14 +20,20 @@ void yyerror(char* msg);
 
 %union {
     struct op* operation;
+    // struct var_list* variable_list;
     char* name;
     char* string;
     int num;
+    int type;
 }
 
 %token <name> IDENTIFIER
 %token <num> INTEGER
 %token <string> TEXT
+%token <type> INT
+%token <type> LONG
+%token <type> FLOAT
+%token <type> DOUBLE
 %type <operation> program
 %type <operation> function_declaration_list
 %type <operation> function_declaration
@@ -57,8 +63,8 @@ void yyerror(char* msg);
 %type <operation> inc_expression
 %type <operation> dec_expression
 %type <operation> expression_or_null
+%type <type> data_type
 
-%token INT
 %token EQ NE LT LE GT GE
 %token IF THEN ELSE FI WHILE FOR DO DONE CONTINUE FUNC INPUT OUTPUT RETURN
 
@@ -100,26 +106,26 @@ function_declaration : function
 
 function : function_head '(' parameter_list ')' block
                             {
-                                $$ = process_function($1,$3,$5);
 	                            reset_table(OUT_LOCAL_TABLE); 
+                                $$ = process_function($1,$3,$5);
                             }
 | error {}
 ;
 
-function_head : INT IDENTIFIER
+function_head : data_type IDENTIFIER
                             {
-                                $$ = process_function_head($2);
+                                $$ = process_function_head($1,$2);
 	                            reset_table(INTO_LOCAL_TABLE); 
                             }
 ;
 
-parameter_list : INT IDENTIFIER               
+parameter_list : data_type IDENTIFIER               
                             {
-                                $$ = process_parameter_list_end($2);
+                                $$ = process_parameter_list_end($1,$2);
                             }
-| parameter_list ',' INT IDENTIFIER               
+| parameter_list ',' data_type IDENTIFIER               
                             {
-                                $$ = process_parameter_list($1,$4);
+                                $$ = process_parameter_list($1,$3,$4);
                             }
 |                           {
                                 $$ = new_op();
@@ -145,9 +151,9 @@ declaration_list :
                             }
 ;
 
-declaration : INT variable_list ';'
+declaration : data_type variable_list ';'
                             {
-                                $$ = cpy_op_and_free($2);
+                                $$ = process_declaration($1,$2);
                             }
 ;
 
@@ -430,6 +436,23 @@ expression_or_null : expression
                                 $$ = new_op();
                             }
 ;
+
+data_type : INT
+                            {
+                                $$ = DATA_INT;
+                            }
+| LONG
+                            {
+                                $$ = DATA_LONG;
+                            }
+| FLOAT
+                            {
+                                $$ = DATA_FLOAT;
+                            }
+| DOUBLE
+                            {
+                                $$ = DATA_DOUBLE;
+                            }
 
 %%
 

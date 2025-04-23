@@ -1,3 +1,4 @@
+struct op *process_declaration(int data_type, struct op *exp_1);
 struct op *process_variable_list_end(char *name);
 struct op *process_variable_list(struct op *exp_1, char *name);
 struct op *process_assign(char *name, struct op *exp_1);

@@ -15,12 +15,18 @@
 #define OUT_LOCAL_TABLE GLOBAL_TABLE
 
 #define NO_TYPE -1
-#define INT_VAR 0
-#define INT_FUNC 1
-#define INT_TEMP 2
-#define INT_NUM 3
-#define LABEL_IFZ 4
-#define STRING 5
+#define ID_VAR 0
+#define ID_FUNC 1
+#define ID_TEMP 2
+#define ID_NUM 3
+#define ID_LABEL 4
+#define ID_STRING 5
+
+#define NO_DATA -1
+#define DATA_INT 0
+#define DATA_LONG 1
+#define DATA_FLOAT 2
+#define DATA_DOUBLE 3
 
 #define TAC_END 0
 #define TAC_LABEL 1
@@ -56,7 +62,7 @@
 // #define NEW_LABEL(label) \
 // 	NAME_ALLOC(label##_name); \
 // 	sprintf(label##_name,"label_%d",label_amount++); \
-// 	struct id *label = add_identifier(label##_name, LABEL_IFZ);
+// 	struct id *label = add_identifier(label##_name, ID_LABEL);
 
 #define NEW_TAC_0(type) new_tac(type, NULL, NULL, NULL)
 
@@ -76,7 +82,8 @@
 struct id {
 	const char *name;
 	int num;
-	int type;
+	int id_type;
+	int data_type;
 	struct id *next;
 };
 
@@ -96,6 +103,12 @@ struct op {
 	struct id *addr;
 };
 
+// // 变量声明
+// struct var_list {
+// 	struct id *var;
+// 	struct var_list *next;
+// };
+
 extern int scope;
 
 // 符号表
@@ -103,7 +116,7 @@ void reset_table(int direction);
 // void clear_table(int scope);
 struct id *find_identifier(const char *name);
 struct id *find_func(const char *name);
-struct id *add_identifier(const char *name, int type);
+struct id *add_identifier(const char *name, int id_type, int data_type);
 
 // 三地址码表
 void tac_init();
@@ -120,5 +133,6 @@ struct id *new_temp();
 struct id *new_label();
 
 // 字符串处理
-const char *to_str(struct id *id);
+const char *id_to_str(struct id *id);
+const char *data_to_str(int type);
 void output_tac(FILE *f, struct tac *code);
