@@ -12,7 +12,7 @@ struct op *process_calculate(struct op *exp_1, struct op *exp_2, int cal) {
 	exp->addr = t;
 	struct id *exp_temp_1 = exp_1->addr;
 	struct id *exp_temp_2 = exp_2->addr;
-	
+
 	cat_op_and_free(exp, exp_1);
 	cat_op_and_free(exp, exp_2);
 	cat_tac(exp, NEW_TAC_3(cal, exp->addr, exp_temp_1, exp_temp_2));
