@@ -2,6 +2,7 @@
 SRCDIR := source
 INCDIR := include
 BUILDDIR := build
+EXAMPLEDIR := example
 
 # Sources and generated files
 SRCS := $(SRCDIR)/e_func.c   \
@@ -42,5 +43,5 @@ clean:
 	rm -rf $(BUILDDIR) tac.txt
 
 test: all
-	./$(TARGET) test.c
+	./$(TARGET) ./$(EXAMPLEDIR)/test.c
 # $(MAKE) clean

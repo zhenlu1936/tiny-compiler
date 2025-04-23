@@ -9,7 +9,7 @@ struct op *process_variable_list_end(char *name) {
 	struct op *variable = new_op();
 
 	struct id *var = add_identifier(name, INT_VAR);
-	
+
 	cat_tac(variable, NEW_TAC_1(TAC_VAR, var));
 
 	return variable;
@@ -37,11 +37,15 @@ struct op *process_for(struct op *exp_1, struct op *exp_2, struct op *exp_3,
 	cat_op_and_free(for_stat, exp_1);
 	cat_tac(for_stat, NEW_TAC_1(TAC_LABEL, label_1));
 	cat_op_and_free(for_stat, exp_2);
-	cat_tac(for_stat, NEW_TAC_2(TAC_IFZ, exp_temp, label_2));
+	if (exp_temp) {
+		cat_tac(for_stat, NEW_TAC_2(TAC_IFZ, exp_temp, label_2));
+	}
 	cat_op_and_free(for_stat, exp_4);
 	cat_op_and_free(for_stat, exp_3);
 	cat_tac(for_stat, NEW_TAC_1(TAC_GOTO, label_1));
-	cat_tac(for_stat, NEW_TAC_1(TAC_LABEL, label_2));
+	if (exp_temp) {
+		cat_tac(for_stat, NEW_TAC_1(TAC_LABEL, label_2));
+	}
 
 	return for_stat;
 }
@@ -120,12 +124,22 @@ struct op *process_return(struct op *exp_1) {
 	return return_stat;
 }
 
-struct op *process_output(char *name) {
+struct op *process_output_variable(char *name) {
 	struct op *output_stat = new_op();
 
 	struct id *var = find_identifier(name);
 
 	cat_tac(output_stat, NEW_TAC_1(TAC_OUTPUT, var));
+
+	return output_stat;
+}
+
+struct op *process_output_text(char *string) {
+	struct op *output_stat = new_op();
+
+	struct id *str = add_identifier(string, STRING);
+
+	cat_tac(output_stat, NEW_TAC_1(TAC_OUTPUT, str));
 
 	return output_stat;
 }

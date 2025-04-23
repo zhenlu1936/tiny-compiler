@@ -11,12 +11,6 @@ extern FILE * yyin;
 extern int yylineno;
 int line;
 
-extern struct id identifiers[MAX];
-extern int identifiers_amount;
-extern int num_amount;
-extern int temp_amount;
-extern int label_amount;
-
 char character;
 char token[1000];
 
@@ -45,7 +39,6 @@ void yyerror(char* msg);
 %type <operation> declaration
 %type <operation> variable_list
 %type <operation> statement_list
-%type <operation> statement_n_expression
 %type <operation> statement
 %type <operation> assign_statement
 %type <operation> input_statement
@@ -56,11 +49,14 @@ void yyerror(char* msg);
 %type <operation> while_statement
 %type <operation> for_statement
 %type <operation> call_statement
+%type <operation> statement_or_expression_or_null
+%type <operation> assign_statement_or_null
 %type <operation> argument_list
 %type <operation> expression_list
+%type <operation> expression
 %type <operation> inc_expression
 %type <operation> dec_expression
-%type <operation> expression
+%type <operation> expression_or_null
 
 %token INT
 %token EQ NE LT LE GT GE
@@ -173,15 +169,6 @@ statement_list : statement
                             }
 ;
 
-statement_n_expression : statement
-                            {
-                                $$ = cpy_op_and_free($1);
-                            }
-| expression
-                            {
-                                $$ = cpy_op_and_free($1);
-                            }
-
 statement : assign_statement ';'
                             {
                                 $$ = cpy_op_and_free($1);
@@ -246,11 +233,11 @@ input_statement : INPUT IDENTIFIER
 
 output_statement : OUTPUT IDENTIFIER
                             {
-                                $$ = process_output($2);
+                                $$ = process_output_variable($2);
                             }
 | OUTPUT TEXT
                             {
-                                $$ = process_output($2);
+                                $$ = process_output_text($2);
                             }
 ;
 
@@ -282,7 +269,7 @@ while_statement : WHILE '(' expression ')' block
                             }
 ;
 
-for_statement : FOR '(' assign_statement ';' expression ';' statement_n_expression ')' block
+for_statement : FOR '(' assign_statement_or_null ';' expression_or_null ';' statement_or_expression_or_null ')' block
                             {
                                 $$ = process_for($3,$5,$7,$9);
                             }
@@ -291,6 +278,30 @@ for_statement : FOR '(' assign_statement ';' expression ';' statement_n_expressi
 call_statement : IDENTIFIER '(' argument_list ')'
                             {
                                 $$ = process_call($1,$3);
+                            }
+;
+
+statement_or_expression_or_null : statement
+                            {
+                                $$ = cpy_op_and_free($1);
+                            }
+| expression
+                            {
+                                $$ = cpy_op_and_free($1);
+                            }
+|
+                            {
+                                $$ = new_op();
+                            }
+;
+
+assign_statement_or_null : assign_statement
+                            {
+                                $$ = cpy_op_and_free($1);
+                            }
+|
+                            {
+                                $$ = new_op();
                             }
 ;
 
@@ -313,24 +324,6 @@ expression_list : expression
                                 $$ = process_expression_list($1,$3);
                             }
 ;
-
-inc_expression : INC IDENTIFIER
-                            {
-                                $$ = process_inc($2,INC_HEAD);
-                            }
-| IDENTIFIER INC
-                            {
-                                $$ = process_inc($1,INC_TAIL);
-                            }
-
-dec_expression : DEC IDENTIFIER
-                            {
-                                $$ = process_dec($2,DEC_HEAD);
-                            }
-| IDENTIFIER DEC
-                            {
-                                $$ = process_dec($1,DEC_TAIL);
-                            }
 
 expression : inc_expression
                             {
@@ -400,6 +393,36 @@ expression : inc_expression
 | IDENTIFIER                            
                             {
                                 $$ = process_identifier($1);
+                            }
+;
+
+inc_expression : INC IDENTIFIER
+                            {
+                                $$ = process_inc($2,INC_HEAD);
+                            }
+| IDENTIFIER INC
+                            {
+                                $$ = process_inc($1,INC_TAIL);
+                            }
+;
+
+dec_expression : DEC IDENTIFIER
+                            {
+                                $$ = process_dec($2,DEC_HEAD);
+                            }
+| IDENTIFIER DEC
+                            {
+                                $$ = process_dec($1,DEC_TAIL);
+                            }
+;
+
+expression_or_null : expression
+                            {
+                                $$ = cpy_op_and_free($1);
+                            }
+| 
+                            {
+                                $$ = new_op();
                             }
 ;
 

@@ -1,6 +1,6 @@
 #define MAX 100
-#define BUF_SIZE 4096
-#define NAME_SIZE 64
+#define BUF_SIZE 64
+#define NAME_SIZE 256
 
 #define NO_ADDR -1
 
@@ -9,8 +9,6 @@
 #define DEC_HEAD 2
 #define DEC_TAIL 3
 
-#define ADD_ID 1
-#define FIND_ID 0
 #define LOCAL_TABLE 1
 #define GLOBAL_TABLE 0
 
@@ -19,7 +17,8 @@
 #define INT_FUNC 1
 #define INT_TEMP 2
 #define INT_NUM 3
-#define LABEL_IFZ 2
+#define LABEL_IFZ 4
+#define STRING 5
 
 #define TAC_END 0
 #define TAC_LABEL 1

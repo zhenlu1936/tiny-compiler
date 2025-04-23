@@ -174,10 +174,12 @@ const char *to_str(struct id *id) {
 	if (id == NULL) return "NULL";
 
 	switch (id->type) {
-		case INT_FUNC:
 		case INT_VAR:
-		case LABEL_IFZ:
+		case INT_FUNC:
+		case INT_TEMP:
 		case INT_NUM:
+		case LABEL_IFZ:
+		case STRING:
 			return id->name;
 
 		default:
