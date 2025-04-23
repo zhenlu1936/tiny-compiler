@@ -57,17 +57,13 @@
 // 	sprintf(label##_name,"label_%d",label_amount++); \
 // 	struct id *label = add_identifier(label##_name, LABEL_IFZ);
 
-#define NEW_TAC_0(type) \
-	new_tac(type, NULL, NULL, NULL)
+#define NEW_TAC_0(type) new_tac(type, NULL, NULL, NULL)
 
-#define NEW_TAC_1(type, id_1) \
-	new_tac(type, id_1, NULL, NULL)
+#define NEW_TAC_1(type, id_1) new_tac(type, id_1, NULL, NULL)
 
-#define NEW_TAC_2(type, id_1, id_2) \
-	new_tac(type, id_1, id_2, NULL)
+#define NEW_TAC_2(type, id_1, id_2) new_tac(type, id_1, id_2, NULL)
 
-#define NEW_TAC_3(type, id_1, id_2, id_3) \
-	new_tac(type, id_1, id_2, id_3)
+#define NEW_TAC_3(type, id_1, id_2, id_3) new_tac(type, id_1, id_2, id_3)
 
 #define MALLOC_AND_SET_ZERO(pointer, len, type)     \
 	pointer = (type *)malloc((len) * sizeof(type)); \
@@ -99,31 +95,24 @@ struct op {
 
 extern int scope;
 
-void tac_init();
-
+// 符号表
 void clear_table(int scope);
-
 struct id *find_identifier(const char *name);
-
 struct id *find_func(const char *name);
-
 struct id *add_identifier(const char *name, int type);
 
+// 三地址码表
+void tac_init();
 void cat_tac(struct op *dest, struct tac *src);
-
 void cat_op_and_free(struct op *dest, struct op *src);
-
 struct op *cat_list_and_free(struct op *exp_1, struct op *exp_2);
-
 struct op *cpy_op_and_free(struct op *src);
 
+// 初始化
 struct op *new_op();
-
 struct tac *new_tac(int type, struct id *id_1, struct id *id_2,
 					struct id *id_3);
-
 struct id *new_temp();
-
 struct id *new_label();
 
 const char *to_str(struct id *id);
