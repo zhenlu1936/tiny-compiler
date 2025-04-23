@@ -85,7 +85,7 @@ function_declaration_list : function_declaration
                             }
 | function_declaration_list function_declaration
                             {
-                                $$ = cat_list($1,$2);
+                                $$ = cat_list_and_free($1,$2);
                             }
 ;
 
@@ -132,7 +132,7 @@ parameter_list : INT IDENTIFIER
 
 block: '{' declaration_list statement_list '}'					
                             {
-                                $$ = cat_list($2,$3);
+                                $$ = cat_list_and_free($2,$3);
                             }
 ;
 
@@ -142,7 +142,7 @@ declaration_list :
                             }
 | declaration_list declaration
                             {
-                                $$ = cat_list($1,$2);
+                                $$ = cat_list_and_free($1,$2);
                             }
 ;
 
@@ -168,7 +168,7 @@ statement_list : statement
                             }  
 | statement_list statement  
                             {
-                                $$ = cat_list($1,$2);
+                                $$ = cat_list_and_free($1,$2);
                             }
 ;
 

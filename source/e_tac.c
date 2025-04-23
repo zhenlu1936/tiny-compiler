@@ -79,12 +79,12 @@ void cat_tac(struct op *dest, struct tac *src) {
 }
 
 // 和cat_tac不同之处在于释放了src
-void cat_op(struct op *dest, struct op *src) {
+void cat_op_and_free(struct op *dest, struct op *src) {
 	cat_tac(dest,src->code);
 	free(src);
 }
 
-struct op *cat_list(struct op *exp_1, struct op *exp_2) {
+struct op *cat_list_and_free(struct op *exp_1, struct op *exp_2) {
 	struct op *stat_list = new_op();
 
 	cat_tac(stat_list, exp_1->code);
@@ -102,6 +102,15 @@ struct op *cpy_op(const struct op *src) {
 	if (src->addr != NULL) {
 		nop->addr = src->addr;
 	}
+	return nop;
+}
+
+struct op *cpy_op_and_free(struct op *src) {
+	struct op *nop = new_op();
+	if (src->addr != NULL) {
+		nop->addr = src->addr;
+	}
+	cat_op_and_free(nop, src);
 	return nop;
 }
 

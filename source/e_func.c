@@ -147,14 +147,10 @@ struct op *process_function(struct op *exp_1, struct op *exp_2,
 							struct op *exp_3) {
 	struct op *function = new_op();
 
-	cat_tac(function, exp_1->code);
-	cat_tac(function, exp_2->code);
-	cat_tac(function, exp_3->code);
+	cat_op_and_free(function, exp_1);
+	cat_op_and_free(function, exp_2);
+	cat_op_and_free(function, exp_3);
 	cat_tac(function, NEW_TAC_0(TAC_END));
-
-	free(exp_1);
-	free(exp_2);
-	free(exp_3);
 
 	return function;
 }
@@ -182,10 +178,8 @@ struct op *process_parameter_list(struct op *exp_1, char *name) {
 	struct op *parameter_list = new_op();
 
 	struct id *var = add_identifier(name, INT_VAR);
-	cat_tac(parameter_list, exp_1->code);
+	cat_op_and_free(parameter_list, exp_1);
 	cat_tac(parameter_list, NEW_TAC_1(TAC_PARAM, var));
-
-	free(exp_1);
 
 	return parameter_list;
 }

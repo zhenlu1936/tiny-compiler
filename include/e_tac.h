@@ -111,11 +111,13 @@ struct id *add_identifier(const char *name, int type);
 
 void cat_tac(struct op *dest, struct tac *src);
 
-void cat_op(struct op *dest, struct op *src);
+void cat_op_and_free(struct op *dest, struct op *src);
 
-struct op *cat_list(struct op *exp_1, struct op *exp_2);
+struct op *cat_list_and_free(struct op *exp_1, struct op *exp_2);
 
 struct op *cpy_op(const struct op *src);
+
+struct op *cpy_op_and_free(struct op *src);
 
 struct op *new_op();
 
