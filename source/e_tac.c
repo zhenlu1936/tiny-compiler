@@ -73,16 +73,26 @@ void tac_init() {
 	label_amount = 1;
 }
 
-void clear_table(int scope) {
+void reset_table(int scope) {
 	struct id **table = _choose_id_table(scope);
-	struct id *head = *table;
-	struct id *cur = head;
 	// 不能直接释放，因为后面输出tac.txt的时候必定要用到id的地址
 	// while (head) {
 	// 	head = cur->next;
 	// 	free(cur);
 	// 	cur = head;
 	// }
+	*table = NULL;
+}
+
+void clear_table(int scope) {
+	struct id **table = _choose_id_table(scope);
+	struct id *head = *table;
+	struct id *cur = head;
+	while (head) {
+		head = cur->next;
+		free(cur);
+		cur = head;
+	}
 	*table = NULL;
 }
 

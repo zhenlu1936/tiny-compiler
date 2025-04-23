@@ -98,6 +98,7 @@ struct op {
 extern int scope;
 
 // 符号表
+void reset_table(int scope);
 void clear_table(int scope);
 struct id *find_identifier(const char *name);
 struct id *find_func(const char *name);

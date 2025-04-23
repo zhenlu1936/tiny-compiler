@@ -17,6 +17,9 @@ struct op *process_program(struct op *exp_1) {
 	}
 	output_tac(f,program->code);
 
+	// clear_table(GLOBAL_TABLE);
+	// clear_table(LOCAL_TABLE);
+
 	return program;
 }
 
