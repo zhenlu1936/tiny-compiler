@@ -11,6 +11,8 @@
 
 #define LOCAL_TABLE 1
 #define GLOBAL_TABLE 0
+#define INTO_LOCAL_TABLE LOCAL_TABLE
+#define OUT_LOCAL_TABLE GLOBAL_TABLE
 
 #define NO_TYPE -1
 #define INT_VAR 0
@@ -97,7 +99,7 @@ struct op {
 extern int scope;
 
 // 符号表
-void reset_table(int scope);
+void reset_table(int direction);
 // void clear_table(int scope);
 struct id *find_identifier(const char *name);
 struct id *find_func(const char *name);

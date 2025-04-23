@@ -73,15 +73,14 @@ void tac_init() {
 	label_amount = 1;
 }
 
-void reset_table(int scope) {
+void reset_table(int direction) {
 	struct id **table = _choose_id_table(scope);
-	// 不能直接释放，因为后面输出tac.txt的时候必定要用到id的地址
-	// while (head) {
-	// 	head = cur->next;
-	// 	free(cur);
-	// 	cur = head;
-	// }
-	*table = NULL;
+	if (direction == INTO_LOCAL_TABLE) {
+		scope = LOCAL_TABLE;
+	} else if (direction == OUT_LOCAL_TABLE) {
+		*table = NULL;
+		scope = GLOBAL_TABLE;
+	}
 }
 
 // void clear_table(int scope) {
