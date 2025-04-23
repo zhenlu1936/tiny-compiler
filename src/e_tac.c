@@ -84,17 +84,17 @@ void reset_table(int scope) {
 	*table = NULL;
 }
 
-void clear_table(int scope) {
-	struct id **table = _choose_id_table(scope);
-	struct id *head = *table;
-	struct id *cur = head;
-	while (head) {
-		head = cur->next;
-		free(cur);
-		cur = head;
-	}
-	*table = NULL;
-}
+// void clear_table(int scope) {
+// 	struct id **table = _choose_id_table(scope);
+// 	struct id *head = *table;
+// 	struct id *cur = head;
+// 	while (head) {
+// 		head = cur->next;
+// 		free(cur);
+// 		cur = head;
+// 	}
+// 	*table = NULL;
+// }
 
 void cat_tac(struct op *dest, struct tac *src) {
 	struct tac *t = dest->code;
