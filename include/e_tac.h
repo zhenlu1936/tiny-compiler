@@ -69,6 +69,8 @@
 	pointer = (type *)malloc((len) * sizeof(type)); \
 	memset(pointer, 0, (len) * sizeof(type));
 
+#include <stdio.h>
+
 // 符号
 struct id {
 	const char *name;
@@ -115,4 +117,6 @@ struct tac *new_tac(int type, struct id *id_1, struct id *id_2,
 struct id *new_temp();
 struct id *new_label();
 
+// 字符串处理
 const char *to_str(struct id *id);
+void output_tac(FILE *f, struct tac *code);
