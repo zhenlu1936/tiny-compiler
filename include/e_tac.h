@@ -109,7 +109,9 @@ struct id *find_func(const char *name);
 
 struct id *add_identifier(const char *name, int type);
 
-void cat_tac(struct op *src_1, struct tac *src_2);
+void cat_tac(struct op *dest, struct tac *src);
+
+void cat_op(struct op *dest, struct op *src);
 
 struct op *cat_list(struct op *exp_1, struct op *exp_2);
 

@@ -78,6 +78,12 @@ void cat_tac(struct op *dest, struct tac *src) {
 	t->next = src;
 }
 
+// 和cat_tac不同之处在于释放了src
+void cat_op(struct op *dest, struct op *src) {
+	cat_tac(dest,src->code);
+	free(src);
+}
+
 struct op *cat_list(struct op *exp_1, struct op *exp_2) {
 	struct op *stat_list = new_op();
 

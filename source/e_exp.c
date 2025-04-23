@@ -8,10 +8,10 @@
 struct op *process_calculate(struct op *exp_1, struct op *exp_2, int cal) {
 	struct op *exp = new_op();
 
-	cat_tac(exp, exp_1->code);
-	cat_tac(exp, exp_2->code);
 	struct id *t = new_temp();
 	exp->addr = t;
+	cat_tac(exp, exp_1->code);
+	cat_tac(exp, exp_2->code);
 	cat_tac(exp, NEW_TAC_3(cal, exp->addr, exp_1->addr, exp_2->addr));
 
 	free(exp_1);
@@ -24,9 +24,9 @@ struct op *process_negative(struct op *exp_1) {
 	struct op *neg_exp = new_op();
 
 	struct id *t = new_temp();
+	neg_exp->addr = t;
 	cat_tac(neg_exp, exp_1->code);
 	cat_tac(neg_exp, NEW_TAC_2(TAC_NEGATIVE, t, exp_1->addr));
-	neg_exp->addr = t;
 
 	free(exp_1);
 

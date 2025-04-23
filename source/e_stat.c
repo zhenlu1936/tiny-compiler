@@ -39,7 +39,6 @@ struct op *process_for(struct op *exp_1, struct op *exp_2, struct op *exp_3,
 	cat_tac(for_stat, NEW_TAC_2(TAC_IFZ, exp_2->addr, label_2));
 	cat_tac(for_stat, exp_4->code);
 	cat_tac(for_stat, exp_3->code);
-
 	cat_tac(for_stat, NEW_TAC_1(TAC_GOTO, label_1));
 	cat_tac(for_stat, NEW_TAC_1(TAC_LABEL, label_2));
 
@@ -61,7 +60,6 @@ struct op *process_while(struct op *exp_1, struct op *exp_2) {
 	cat_tac(while_stat, exp_1->code);
 	cat_tac(while_stat, NEW_TAC_2(TAC_IFZ, exp_1->addr, label_2));
 	cat_tac(while_stat, exp_2->code);
-
 	cat_tac(while_stat, NEW_TAC_1(TAC_GOTO, label_1));
 	cat_tac(while_stat, NEW_TAC_1(TAC_LABEL, label_2));
 
@@ -92,14 +90,13 @@ struct op *process_if_else(struct op *exp_1, struct op *exp_2,
 	struct op *if_else_stat = new_op();
 
 	struct id *label_1 = new_label();
+	struct id *label_2 = new_label();
+
 	cat_tac(if_else_stat, exp_1->code);
 	cat_tac(if_else_stat, NEW_TAC_2(TAC_IFZ, exp_1->addr, label_1));
 	cat_tac(if_else_stat, exp_2->code);
-
-	struct id *label_2 = new_label();
 	cat_tac(if_else_stat, NEW_TAC_1(TAC_GOTO, label_2));
 	cat_tac(if_else_stat, NEW_TAC_1(TAC_LABEL, label_1));
-
 	cat_tac(if_else_stat, exp_3->code);
 	cat_tac(if_else_stat, NEW_TAC_1(TAC_LABEL, label_2));
 
