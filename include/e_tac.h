@@ -97,8 +97,6 @@ struct op {
 	struct id *addr;
 };
 
-extern struct id *id_global, *id_local;
-extern int global_amount, local_amount;
 extern int scope;
 
 void tac_init();

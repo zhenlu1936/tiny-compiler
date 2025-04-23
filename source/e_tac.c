@@ -4,51 +4,49 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct id *id_global, *id_local;
-int global_amount, local_amount;
 int scope;
 
-static int *identifiers_amount;
-static int num_amount;
+static struct id *id_global, *id_local;
 static int temp_amount;
 static int label_amount;
 
 void tac_init() {
 	scope = GLOBAL_TABLE;
-	// MALLOC_AND_SET_ZERO(id_global, MAX, struct id);
-	// MALLOC_AND_SET_ZERO(id_local, MAX, struct id);
 	temp_amount = 0;
 	label_amount = 1;
 }
 
-static struct id *_find_identifier(const char *name, int purpose, int type,
-								   struct id **id_table) {
+static struct id *_find_identifier(const char *name, struct id **id_table) {
 	int has_finded = 0;
 	struct id *id_wanted;
 	struct id *cur = *id_table;
 
-	if (purpose == ADD_ID) {
-		MALLOC_AND_SET_ZERO(id_wanted, 1, struct id);
-		char *id_name = (char *)malloc(sizeof(char) * strlen(name));
-		strcpy(id_name, name);
-		id_wanted->name = id_name;
-		id_wanted->type = type;
-		id_wanted->next = *id_table;
-		*id_table = id_wanted;
-	} else if (purpose == FIND_ID) {
-		while (cur) {
-			if (cur->name && !strcmp(name, cur->name)) {
-				has_finded = 1;
-				id_wanted = cur;
-				break;
-			}
-			cur = cur->next;
+	while (cur) {
+		if (cur->name && !strcmp(name, cur->name)) {
+			has_finded = 1;
+			id_wanted = cur;
+			break;
 		}
-		if (purpose == FIND_ID && !has_finded) {
-			perror("identifier not found");
-			printf("want name: %s \n", name);
-		}
+		cur = cur->next;
 	}
+	if (!has_finded) {
+		perror("identifier not found");
+		printf("want name: %s \n", name);
+	}
+	return id_wanted;
+}
+
+static struct id *_add_identifier(const char *name, int type,
+								  struct id **id_table) {
+	struct id *id_wanted;
+
+	MALLOC_AND_SET_ZERO(id_wanted, 1, struct id);
+	char *id_name = (char *)malloc(sizeof(char) * strlen(name));
+	strcpy(id_name, name);
+	id_wanted->name = id_name;
+	id_wanted->type = type;
+	id_wanted->next = *id_table;
+	*id_table = id_wanted;
 
 	return id_wanted;
 }
@@ -62,16 +60,15 @@ static struct id **_choose_id_table(int table) {
 }
 
 struct id *find_identifier(const char *name) {
-	return _find_identifier(name, FIND_ID, NO_TYPE, _choose_id_table(scope));
+	return _find_identifier(name, _choose_id_table(scope));
 }
 
 struct id *find_func(const char *name) {
-	return _find_identifier(name, FIND_ID, NO_TYPE,
-							_choose_id_table(GLOBAL_TABLE));
+	return _find_identifier(name, _choose_id_table(GLOBAL_TABLE));
 }
 
 struct id *add_identifier(const char *name, int type) {
-	return _find_identifier(name, ADD_ID, type, _choose_id_table(scope));
+	return _add_identifier(name, type, _choose_id_table(scope));
 }
 
 void cat_tac(struct op *dest, struct tac *src) {
