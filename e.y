@@ -81,7 +81,7 @@ program : function_declaration_list
 
 function_declaration_list : function_declaration
                             {
-                                $$ = cpy_op($1);
+                                $$ = cpy_op_and_free($1);
                             }
 | function_declaration_list function_declaration
                             {
@@ -91,12 +91,12 @@ function_declaration_list : function_declaration
 
 function_declaration : function
                             {
-                                $$ = cpy_op($1);
+                                $$ = cpy_op_and_free($1);
                                 //cat_tac($$->tac,"\n");
                             }
 | declaration 
                             {
-                                $$ = cpy_op($1);
+                                $$ = cpy_op_and_free($1);
                                 //cat_tac($$->tac,"\n");
                             }
 ;
@@ -148,7 +148,7 @@ declaration_list :
 
 declaration : INT variable_list ';'
                             {
-                                $$ = cpy_op($2);
+                                $$ = cpy_op_and_free($2);
                             }
 ;
 
@@ -164,7 +164,7 @@ variable_list : IDENTIFIER
 
 statement_list : statement			
                             {
-                                $$ = cpy_op($1);
+                                $$ = cpy_op_and_free($1);
                             }  
 | statement_list statement  
                             {
@@ -174,52 +174,52 @@ statement_list : statement
 
 statement_n_expression : statement
                             {
-                                $$ = cpy_op($1);
+                                $$ = cpy_op_and_free($1);
                             }
 | expression
                             {
-                                $$ = cpy_op($1);
+                                $$ = cpy_op_and_free($1);
                             }
 
 statement : assign_statement ';'
                             {
-                                $$ = cpy_op($1);
+                                $$ = cpy_op_and_free($1);
                             }
 | input_statement ';' 
                             {
-                                $$ = cpy_op($1);
+                                $$ = cpy_op_and_free($1);
                             }
 | output_statement ';' 
                             {
-                                $$ = cpy_op($1);
+                                $$ = cpy_op_and_free($1);
                             }
 | call_statement ';'
                             {
-                                $$ = cpy_op($1);
+                                $$ = cpy_op_and_free($1);
                             }
 | return_statement ';' 
                             {
-                                $$ = cpy_op($1);
+                                $$ = cpy_op_and_free($1);
                             }
 | null_statement ';'
                             {
-                                $$ = cpy_op($1);
+                                $$ = cpy_op_and_free($1);
                             }
 | if_statement
                             {
-                                $$ = cpy_op($1);
+                                $$ = cpy_op_and_free($1);
                             }
 | while_statement 
                             {
-                                $$ = cpy_op($1);
+                                $$ = cpy_op_and_free($1);
                             }
 | for_statement 
                             {
-                                $$ = cpy_op($1);
+                                $$ = cpy_op_and_free($1);
                             }
 | block 
                             {
-                                $$ = cpy_op($1);
+                                $$ = cpy_op_and_free($1);
                             }
 | error
                             {
@@ -299,7 +299,7 @@ argument_list  :
                             }
 | expression_list
                             {
-                                $$ = cpy_op($1)
+                                $$ = cpy_op_and_free($1)
                             }
 ;
 
@@ -333,11 +333,11 @@ dec_expression : DEC IDENTIFIER
 
 expression : inc_expression
                             {
-                                $$ = cpy_op($1);
+                                $$ = cpy_op_and_free($1);
                             }
 | dec_expression
                             {
-                                $$ = cpy_op($1);
+                                $$ = cpy_op_and_free($1);
                             }
 | expression '+' expression	
                             { 
@@ -381,7 +381,7 @@ expression : inc_expression
                             }	
 | '(' expression ')'				
                             { 
-                                $$ = cpy_op($2);
+                                $$ = cpy_op_and_free($2);
                             }
 | '-' expression  %prec NEGATIVE
                             {
@@ -390,7 +390,7 @@ expression : inc_expression
 
 | call_statement
                             {
-                                $$ = cpy_op($1);
+                                $$ = cpy_op_and_free($1);
                             }
 | INTEGER					
                             {

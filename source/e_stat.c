@@ -9,6 +9,7 @@ struct op *process_variable_list_end(char *name) {
 	struct op *variable = new_op();
 
 	struct id *var = add_identifier(name, INT_VAR);
+	
 	cat_tac(variable, NEW_TAC_1(TAC_VAR, var));
 
 	return variable;
@@ -18,6 +19,7 @@ struct op *process_variable_list(struct op *exp_1, char *name) {
 	struct op *variable_list = new_op();
 
 	struct id *var = add_identifier(name, INT_VAR);
+
 	cat_op_and_free(variable_list, exp_1);
 	cat_tac(variable_list, NEW_TAC_1(TAC_VAR, var));
 
@@ -111,6 +113,7 @@ struct op *process_return(struct op *exp_1) {
 	struct op *return_stat = new_op();
 
 	struct id *exp_temp = exp_1->addr;
+
 	cat_op_and_free(return_stat, exp_1);
 	cat_tac(return_stat, NEW_TAC_1(TAC_RETURN, exp_temp));
 
@@ -121,6 +124,7 @@ struct op *process_output(char *name) {
 	struct op *output_stat = new_op();
 
 	struct id *var = find_identifier(name);
+
 	cat_tac(output_stat, NEW_TAC_1(TAC_OUTPUT, var));
 
 	return output_stat;
@@ -130,6 +134,7 @@ struct op *process_input(char *name) {
 	struct op *input_stat = new_op();
 
 	struct id *var = find_identifier(name);
+
 	cat_tac(input_stat, NEW_TAC_1(TAC_INPUT, var));
 
 	return input_stat;
