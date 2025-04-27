@@ -5,9 +5,7 @@ BUILDDIR := build
 TESTDIR := test
 
 # Sources and generated files
-SRCS := $(SRCDIR)/e_func.c   \
-        $(SRCDIR)/e_stat.c   \
-        $(SRCDIR)/e_exp.c    \
+SRCS := $(SRCDIR)/e_proc.c   \
 		$(SRCDIR)/e_tac.c    \
 		$(SRCDIR)/e_main.c	 
 LEX_SRC := $(SRCDIR)/e.l

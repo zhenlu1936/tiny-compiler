@@ -208,7 +208,7 @@ const char *data_to_str(int type) {
 
 		default:
 			perror("unknown data type");
-			printf("id type: %d\n",type);
+			printf("id type: %d\n", type);
 			return "?";
 	}
 }

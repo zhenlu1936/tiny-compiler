@@ -2,9 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "e_func.h"
-#include "e_stat.h"
-#include "e_exp.h"
+#include "e_proc.h"
 #include "e_tac.h"
 
 extern FILE * yyin;
