@@ -317,7 +317,7 @@ argument_list  :
                             }
 | expression_list
                             {
-                                $$ = cpy_op($1)
+                                $$ = cpy_op($1);
                             }
 ;
 
