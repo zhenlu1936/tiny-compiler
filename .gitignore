@@ -4,3 +4,4 @@ tac.txt*
 test.c.*
 .vscode/
 e.dSYM/
+.homework*
