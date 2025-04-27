@@ -120,17 +120,17 @@ struct op *cat_list_and_free(struct op *exp_1, struct op *exp_2) {
 	return stat_list;
 }
 
-static struct op *cpy_op(const struct op *src) {
-	struct op *nop = new_op();
-	cat_tac(nop, src->code);
-	if (src->addr != NULL) {
-		nop->addr = src->addr;
-	}
-	return nop;
-}
+// static struct op *cpy_op(const struct op *src) {
+// 	struct op *nop = new_op();
+// 	cat_tac(nop, src->code);
+// 	if (src->addr != NULL) {
+// 		nop->addr = src->addr;
+// 	}
+// 	return nop;
+// }
 
 // 目前来看，并不需要复制再释放的操作，只需要把指针本身复制给dest
-struct op *cpy_op_and_free(struct op *src) {
+struct op *cpy_op(struct op *src) {
 	// struct op *nop = cpy_op(src);
 	// free(src);
 	// return nop;

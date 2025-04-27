@@ -290,7 +290,7 @@ struct op *process_assign(char *name, struct op *exp_1) {
 
 /**********/
 struct op *process_program(struct op *exp_1) {
-	struct op *program = cpy_op_and_free(exp_1);
+	struct op *program = cpy_op(exp_1);
 
 	printf("program compiled to tac!\n");
 
