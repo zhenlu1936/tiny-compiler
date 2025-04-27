@@ -8,6 +8,8 @@ TESTDIR := test
 SRCS := $(SRCDIR)/e_proc.c   \
 		$(SRCDIR)/e_tac.c    \
 		$(SRCDIR)/e_main.c	 
+INCS := $(INCDIR)/e_proc.h   \
+		$(INCDIR)/e_tac.h    
 LEX_SRC := $(SRCDIR)/e.l
 YACC_SRC := $(SRCDIR)/e.y
 
@@ -32,7 +34,7 @@ $(BUILDDIR):
 
 all: $(TARGET)
 
-$(TARGET): $(SRCS) $(LEX_SRC) $(YACC_SRC) | $(BUILDDIR)
+$(TARGET): $(SRCS) $(LEX_SRC) $(YACC_SRC) $(INCS) | $(BUILDDIR)
 	$(LEX) -o $(LEX_C) $(LEX_SRC)
 	$(YACC) -d -v -o $(YACC_C) $(YACC_SRC)
 	$(CC) $(CFLAGS) -o $@ $(LEX_C) $(YACC_C) $(SRCS)
