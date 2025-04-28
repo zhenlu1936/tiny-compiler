@@ -182,7 +182,6 @@ const char *id_to_str(struct id *id) {
 		case ID_VAR:
 		case ID_FUNC:
 		case ID_TEMP:
-		case ID_NUM:
 		case ID_LABEL:
 		case ID_STRING:
 			return id->name;

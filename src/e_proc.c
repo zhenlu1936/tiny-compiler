@@ -41,7 +41,8 @@ struct op *process_int(int integer) {
 
 	BUF_ALLOC(buf);
 	sprintf(buf, "%d", integer);
-	struct id *var = add_identifier(buf, ID_NUM, NO_DATA);
+	struct id *var = add_identifier(buf, ID_NUM, DATA_INT);
+	var->num.num_int=integer;
 	int_exp->addr = var;
 
 	return int_exp;
@@ -53,7 +54,8 @@ struct op *process_float(double floatnum) {
 
 	BUF_ALLOC(buf);
 	sprintf(buf, "%f", floatnum);
-	struct id *var = add_identifier(buf, ID_NUM, NO_DATA);
+	struct id *var = add_identifier(buf, ID_NUM, DATA_FLOAT);
+	var->num.num_float=floatnum;
 	int_exp->addr = var;
 
 	return int_exp;
