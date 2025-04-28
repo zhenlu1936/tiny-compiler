@@ -4,4 +4,5 @@ tac.txt*
 test.c.*
 .vscode/
 e.dSYM/
-.homework*
+homework*
+.clangd

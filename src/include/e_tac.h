@@ -121,8 +121,8 @@ struct id *add_identifier(const char *name, int id_type, int data_type);
 // 三地址码表
 void tac_init();
 void cat_tac(struct op *dest, struct tac *src);
-void cat_op_and_free(struct op *dest, struct op *src);
-struct op *cat_list_and_free(struct op *exp_1, struct op *exp_2);
+void cat_op(struct op *dest, struct op *src); // 会释放src
+struct op *cat_list(struct op *exp_1, struct op *exp_2); // 会释放exp_2
 struct op *cpy_op(struct op *src);
 
 // 初始化

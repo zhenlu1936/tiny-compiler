@@ -44,7 +44,9 @@
 
 [A-Za-z]([A-Za-z]|[0-9])*  {  yylval.name = strdup(yytext); return IDENTIFIER;  }
 
-[0-9]+  {  yylval.num = atoi(yytext); return INTEGER;  }
+[0-9]+  {  yylval.num_int = atoi(yytext); return NUM_INT;  }
+
+[0-9]+\.[0-9]+  {  yylval.num_float = strtod(yytext,NULL); return NUM_FLOAT;  }
 
 \"[^\"]*\" { 
 			//char* tmp = process_string(strdup(yytext));

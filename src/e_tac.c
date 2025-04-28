@@ -12,7 +12,7 @@ static int label_amount;
 
 static struct id *_find_identifier(const char *name, struct id **id_table) {
 	int has_finded = 0;
-	struct id *id_wanted;
+	struct id *id_wanted = NULL;
 	struct id *cur = *id_table;
 
 	while (cur) {
@@ -106,16 +106,16 @@ void cat_tac(struct op *dest, struct tac *src) {
 }
 
 // 和cat_tac不同之处在于，释放了作为struct op的src
-void cat_op_and_free(struct op *dest, struct op *src) {
+void cat_op(struct op *dest, struct op *src) {
 	cat_tac(dest, src->code);
 	free(src);
 }
 
-struct op *cat_list_and_free(struct op *exp_1, struct op *exp_2) {
+struct op *cat_list(struct op *exp_1, struct op *exp_2) {
 	struct op *stat_list = new_op();
 
-	cat_op_and_free(stat_list, exp_1);
-	cat_op_and_free(stat_list, exp_2);
+	cat_op(stat_list, exp_1);
+	cat_op(stat_list, exp_2);
 
 	return stat_list;
 }

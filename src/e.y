@@ -21,12 +21,14 @@ void yyerror(char* msg);
     // struct var_list* variable_list;
     char* name;
     char* string;
-    int num;
+    int num_int;
+    double num_float;
     int type;
 }
 
 %token <name> IDENTIFIER
-%token <num> INTEGER
+%token <num_int> NUM_INT
+%token <num_float> NUM_FLOAT
 %token <string> TEXT
 %token <type> INT
 %token <type> LONG
@@ -88,7 +90,7 @@ function_declaration_list : function_declaration
                             }
 | function_declaration_list function_declaration
                             {
-                                $$ = cat_list_and_free($1,$2);
+                                $$ = cat_list($1,$2);
                             }
 ;
 
@@ -135,7 +137,7 @@ parameter_list : data_type IDENTIFIER
 /**************************************/
 block: '{' declaration_list statement_list '}'					
                             {
-                                $$ = cat_list_and_free($2,$3);
+                                $$ = cat_list($2,$3);
                             }
 ;
 
@@ -145,7 +147,7 @@ declaration_list :
                             }
 | declaration_list declaration
                             {
-                                $$ = cat_list_and_free($1,$2);
+                                $$ = cat_list($1,$2);
                             }
 ;
 
@@ -171,7 +173,7 @@ statement_list : statement
                             }  
 | statement_list statement  
                             {
-                                $$ = cat_list_and_free($1,$2);
+                                $$ = cat_list($1,$2);
                             }
 ;
 
@@ -395,9 +397,13 @@ expression : inc_expression
                             {
                                 $$ = cpy_op($1);
                             }
-| INTEGER					
+| NUM_INT					
                             {
-                                $$ = process_integer($1);
+                                $$ = process_int($1);
+                            }
+| NUM_FLOAT
+                            {
+                                $$ = process_float($1);
                             }
 | IDENTIFIER                            
                             {
