@@ -5,18 +5,23 @@
 
 #include "e_tac.h"
 
+/*****expression*****/
 // 处理形如"a=a op b"的表达式
 struct op *process_calculate(struct op *exp_l, struct op *exp_r, int cal) {
 	struct op *exp = new_op();
 
-	struct id *t = new_temp(); // 分配临时变量
+	struct id *t = new_temp();	// 分配临时变量
 	exp->addr = t;
 	struct id *exp_l_addr = exp_l->addr;
 	struct id *exp_r_addr = exp_r->addr;
 
-	cat_op(exp, exp_l); // 拼接exp和exp_l的code
-	cat_op(exp, exp_r); // 拼接exp和exp_r的code
-	cat_tac(exp, NEW_TAC_3(cal, exp->addr, exp_l_addr, exp_r_addr)); // 生成并拼接代表目标表达式的三地址码
+	cat_op(exp, exp_l);	 // 拼接exp和exp_l的code
+	cat_op(exp, exp_r);	 // 拼接exp和exp_r的code
+	cat_tac(
+		exp,
+		NEW_TAC_3(
+			cal, exp->addr, exp_l_addr,
+			exp_r_addr));  // 生成代表目标表达式的三地址码，并拼接至exp的code末尾
 
 	return exp;
 }
@@ -39,10 +44,11 @@ struct op *process_negative(struct op *exp) {
 struct op *process_int(int integer) {
 	struct op *int_exp = new_op();
 
-	BUF_ALLOC(buf);
+	BUF_ALLOC(buf);	 // 声明一个char数组变量buf，储存符号名
 	sprintf(buf, "%d", integer);
-	struct id *var = add_identifier(buf, ID_NUM, DATA_INT);
-	var->num.num_int=integer;
+	struct id *var =
+		add_identifier(buf, ID_NUM, DATA_INT);	// 向符号表添加以buf为名的符号
+	var->num.num_int = integer;
 	int_exp->addr = var;
 
 	return int_exp;
@@ -55,7 +61,7 @@ struct op *process_float(double floatnum) {
 	BUF_ALLOC(buf);
 	sprintf(buf, "%f", floatnum);
 	struct id *var = add_identifier(buf, ID_NUM, DATA_FLOAT);
-	var->num.num_float=floatnum;
+	var->num.num_float = floatnum;
 	int_exp->addr = var;
 
 	return int_exp;
@@ -82,10 +88,11 @@ struct op *process_inc(char *name, int pos) {
 
 	if (pos == INC_HEAD) {
 		cat_tac(inc_exp, NEW_TAC_3(TAC_PLUS, t, var, num));
+		cat_tac(inc_exp, NEW_TAC_2(TAC_ASSIGN, var, t));
 	} else {
 		cat_tac(inc_exp, NEW_TAC_2(TAC_ASSIGN, t, var));
+		cat_tac(inc_exp, NEW_TAC_3(TAC_PLUS, var, t, num));
 	}
-	cat_tac(inc_exp, NEW_TAC_3(TAC_PLUS, var, t, num));
 
 	return inc_exp;
 }
@@ -101,10 +108,11 @@ struct op *process_dec(char *name, int pos) {
 
 	if (pos == INC_HEAD) {
 		cat_tac(dec_exp, NEW_TAC_3(TAC_MINUS, t, var, num));
+		cat_tac(dec_exp, NEW_TAC_2(TAC_ASSIGN, var, t));
 	} else {
 		cat_tac(dec_exp, NEW_TAC_2(TAC_ASSIGN, t, var));
+		cat_tac(dec_exp, NEW_TAC_3(TAC_MINUS, var, t, num));
 	}
-	cat_tac(dec_exp, NEW_TAC_3(TAC_MINUS, var, t, num));
 
 	return dec_exp;
 }
@@ -122,7 +130,8 @@ struct op *process_expression_list_end(struct op *arg_exp) {
 }
 
 // 处理表达式列表，在调用函数时生成实参
-struct op *process_expression_list(struct op *arg_list_pre, struct op *arg_exp) {
+struct op *process_expression_list(struct op *arg_list_pre,
+								   struct op *arg_exp) {
 	struct op *exp_list = new_op();
 
 	struct id *exp_temp = arg_exp->addr;
@@ -134,13 +143,14 @@ struct op *process_expression_list(struct op *arg_list_pre, struct op *arg_exp) 
 	return exp_list;
 }
 
-/**********/
-// 处理变量声明，为process_variable生成的变量加上类型
+/*****statement*****/
+// 处理变量声明，为process_variable函数声明的变量加上类型
 struct op *process_declaration(int data_type, struct op *declaration_exp) {
 	struct op *declaration = new_op();
 
 	struct tac *head = declaration_exp->code;
-	while (head) {
+	while (
+		head) {	 // 逐个修改包含已声明变量的declaration_exp表达式所含变量的类型
 		head->id_1->data_type = data_type;
 		head = head->next;
 	}
@@ -173,8 +183,8 @@ struct op *process_variable_list(struct op *var_list_pre, char *name) {
 }
 
 // 处理for语句块
-struct op *process_for(struct op *initialization_exp, struct op *condition_exp, struct op *iteration_exp,
-					   struct op *block) {
+struct op *process_for(struct op *initialization_exp, struct op *condition_exp,
+					   struct op *iteration_exp, struct op *block) {
 	struct op *for_stat = new_op();
 
 	struct id *label_1 = new_label();
@@ -184,13 +194,13 @@ struct op *process_for(struct op *initialization_exp, struct op *condition_exp, 
 	cat_op(for_stat, initialization_exp);
 	cat_tac(for_stat, NEW_TAC_1(TAC_LABEL, label_1));
 	cat_op(for_stat, condition_exp);
-	if (exp_temp) {
+	if (exp_temp) {	 // 如果condition_exp不为空，则拼接label_2
 		cat_tac(for_stat, NEW_TAC_2(TAC_IFZ, exp_temp, label_2));
 	}
 	cat_op(for_stat, block);
 	cat_op(for_stat, iteration_exp);
 	cat_tac(for_stat, NEW_TAC_1(TAC_GOTO, label_1));
-	if (exp_temp) {
+	if (exp_temp) {	 // 如果condition_exp不为空，则拼接label_2
 		cat_tac(for_stat, NEW_TAC_1(TAC_LABEL, label_2));
 	}
 
@@ -322,7 +332,7 @@ struct op *process_assign(char *name, struct op *exp) {
 	return assign_stat;
 }
 
-/**********/
+/*****function&program*****/
 // 处理整个程序，输出code
 struct op *process_program(struct op *program) {
 	printf("program compiled to tac!\n");
@@ -356,7 +366,8 @@ struct op *process_function(struct op *function_head, struct op *parameter_list,
 struct op *process_function_head(int data_type, char *name) {
 	struct op *function_head = new_op();
 
-	struct id *func = add_identifier(name, ID_FUNC, data_type);
+	struct id *func = add_identifier(
+		name, ID_FUNC, data_type);	// 向符号表添加类型为函数的符号
 	cat_tac(function_head, NEW_TAC_1(TAC_LABEL, func));
 	cat_tac(function_head, NEW_TAC_0(TAC_BEGIN));
 
@@ -374,7 +385,8 @@ struct op *process_parameter_list_end(int data_type, char *name) {
 }
 
 // 处理函数参数列表，加入标识符
-struct op *process_parameter_list(struct op *param_list_pre, int data_type, char *name) {
+struct op *process_parameter_list(struct op *param_list_pre, int data_type,
+								  char *name) {
 	struct op *parameter_list = new_op();
 
 	struct id *var = add_identifier(name, ID_VAR, data_type);

@@ -180,6 +180,7 @@ const char *id_to_str(struct id *id) {
 
 	switch (id->id_type) {
 		case ID_VAR:
+		case ID_NUM:
 		case ID_FUNC:
 		case ID_TEMP:
 		case ID_LABEL:
