@@ -1,59 +1,65 @@
-#define MAX 100
-#define BUF_SIZE 64
-#define NAME_SIZE 256
+// 常量定义
+#define MAX 100          	// 最大值
+#define BUF_SIZE 64      	// 缓冲区大小
+#define NAME_SIZE 256    	// 名称字符串的最大长度
 
-#define NO_ADDR -1
+#define NO_ADDR -1       	// 无地址标识
 
-#define INC_HEAD 0
-#define INC_TAIL 1
-#define DEC_HEAD 2
-#define DEC_TAIL 3
+// 符号表操作方向
+#define INC_HEAD 0       	// 增加到表头
+#define INC_TAIL 1       	// 增加到表尾
+#define DEC_HEAD 2       	// 从表头减少
+#define DEC_TAIL 3       	// 从表尾减少
 
-#define LOCAL_TABLE 1
-#define GLOBAL_TABLE 0
-#define INTO_LOCAL_TABLE LOCAL_TABLE
-#define OUT_LOCAL_TABLE GLOBAL_TABLE
+// 符号表范围
+#define LOCAL_TABLE 1    	// 局部符号表
+#define GLOBAL_TABLE 0   	// 全局符号表
+#define INTO_LOCAL_TABLE LOCAL_TABLE  // 进入局部符号表
+#define OUT_LOCAL_TABLE GLOBAL_TABLE  // 退出局部符号表
 
-#define NO_TYPE -1
-#define ID_VAR 0
-#define ID_FUNC 1
-#define ID_TEMP 2
-#define ID_NUM 3
-#define ID_LABEL 4
-#define ID_STRING 5
+// 符号类型
+#define NO_TYPE -1       	// 无类型
+#define ID_VAR 0         	// 变量
+#define ID_FUNC 1        	// 函数
+#define ID_TEMP 2        	// 临时变量
+#define ID_NUM 3         	// 数字常量
+#define ID_LABEL 4       	// 标签
+#define ID_STRING 5      	// 字符串
 
-#define NO_DATA -1
-#define DATA_INT 0
-#define DATA_LONG 1
-#define DATA_FLOAT 2
-#define DATA_DOUBLE 3
+// 数据类型
+#define NO_DATA -1       	// 无数据类型
+#define DATA_INT 0       	// 整型
+#define DATA_LONG 1      	// 长整型
+#define DATA_FLOAT 2     	// 浮点型
+#define DATA_DOUBLE 3    	// 双精度浮点型
 
-#define TAC_END 0
-#define TAC_LABEL 1
-#define TAC_BEGIN 2
-#define TAC_PARAM 3
-#define TAC_VAR 4
-#define TAC_IFZ 5
-#define TAC_CALL 6
-#define TAC_RETURN 7
-#define TAC_OUTPUT 8
-#define TAC_INPUT 9
-#define TAC_ASSIGN 10
-#define TAC_NEGATIVE 12
-#define TAC_INTEGER 13
-#define TAC_IDENTIFIER 14
-#define TAC_ARG 15
-#define TAC_GOTO 16
-#define TAC_PLUS 20
-#define TAC_MINUS 21
-#define TAC_MULTIPLY 22
-#define TAC_DIVIDE 23
-#define TAC_EQ 24
-#define TAC_NE 25
-#define TAC_LT 26
-#define TAC_LE 27
-#define TAC_GT 28
-#define TAC_GE 29
+// 三地址码类型
+#define TAC_END 0        	// 结束
+#define TAC_LABEL 1      	// 标签
+#define TAC_BEGIN 2      	// 函数开始
+#define TAC_PARAM 3      	// 参数
+#define TAC_VAR 4        	// 变量声明
+#define TAC_IFZ 5        	// 条件跳转（if not）
+#define TAC_CALL 6       	// 函数调用
+#define TAC_RETURN 7     	// 返回
+#define TAC_OUTPUT 8     	// 输出
+#define TAC_INPUT 9      	// 输入
+#define TAC_ASSIGN 10    	// 赋值
+#define TAC_NEGATIVE 12  	// 取负
+#define TAC_INTEGER 13   	// 整数常量
+#define TAC_IDENTIFIER 14	// 标识符
+#define TAC_ARG 15		 	// 函数参数
+#define TAC_GOTO 16      	// 无条件跳转
+#define TAC_PLUS 20      	// 加法
+#define TAC_MINUS 21     	// 减法
+#define TAC_MULTIPLY 22  	// 乘法
+#define TAC_DIVIDE 23    	// 除法
+#define TAC_EQ 24        	// 等于
+#define TAC_NE 25        	// 不等于
+#define TAC_LT 26        	// 小于
+#define TAC_LE 27        	// 小于等于
+#define TAC_GT 28        	// 大于
+#define TAC_GE 29        	// 大于等于
 
 #define BUF_ALLOC(buf) char buf[BUF_SIZE] = {0};
 
@@ -113,6 +119,8 @@ struct op {
 // };
 
 extern int scope;
+extern struct tac *tac_head;
+extern struct tac *tac_tail;
 
 // 符号表
 void reset_table(int direction);
@@ -138,4 +146,4 @@ struct id *new_label();
 // 字符串处理
 const char *id_to_str(struct id *id);
 const char *data_to_str(int type);
-void output_tac(FILE *f, struct tac *code);
+void tac_output(FILE *f, struct tac *code);

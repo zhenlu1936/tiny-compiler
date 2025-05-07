@@ -213,7 +213,7 @@ const char *data_to_str(int type) {
 	}
 }
 
-void output_tac(FILE *f, struct tac *code) {
+void tac_output(FILE *f, struct tac *code) {
 	while (code) {
 		switch (code->type) {
 			case TAC_PLUS:

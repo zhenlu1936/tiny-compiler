@@ -5,6 +5,8 @@
 
 #include "e_tac.h"
 
+struct tac *tac_head;
+
 /*****expression*****/
 // 处理形如"a=a op b"的表达式
 struct op *process_calculate(struct op *exp_l, struct op *exp_r, int cal) {
@@ -337,11 +339,7 @@ struct op *process_assign(char *name, struct op *exp) {
 struct op *process_program(struct op *program) {
 	printf("program compiled to tac!\n");
 
-	FILE *f = fopen("tac.txt", "w");
-	if (f == NULL) {
-		perror("failed to open file");
-	}
-	output_tac(f, program->code);
+	tac_head = program->code;
 
 	// clear_table(GLOBAL_TABLE);
 	// clear_table(LOCAL_TABLE);
