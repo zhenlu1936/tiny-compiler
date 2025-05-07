@@ -1,7 +1,13 @@
+# output
 build/
-mini/
 tac.txt*
 test.c.*
+
+# reference from ysj
+object/
+mini/
+
+# hjj's own
 .vscode/
 e.dSYM/
 homework*

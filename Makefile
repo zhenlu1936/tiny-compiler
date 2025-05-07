@@ -1,17 +1,19 @@
 # Directories
 SRCDIR := src
+FRTDIR := $(SRCDIR)/frontend
+BCKDIR := $(SRCDIR)/backend
 INCDIR := $(SRCDIR)/include
 BUILDDIR := build
 TESTDIR := test
 
 # Sources and generated files
-SRCS := $(SRCDIR)/e_proc.c   \
-		$(SRCDIR)/e_tac.c    \
+SRCS := $(FRTDIR)/e_proc.c   \
+		$(FRTDIR)/e_tac.c    \
 		$(SRCDIR)/e_main.c	 
 INCS := $(INCDIR)/e_proc.h   \
 		$(INCDIR)/e_tac.h    
-LEX_SRC := $(SRCDIR)/e.l
-YACC_SRC := $(SRCDIR)/e.y
+LEX_SRC := $(FRTDIR)/e.l
+YACC_SRC := $(FRTDIR)/e.y
 
 # Build outputs
 LEX_C := $(BUILDDIR)/e.l.c
