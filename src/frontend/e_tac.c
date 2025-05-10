@@ -39,15 +39,20 @@ static struct id **_choose_id_table(int table) {
 	}
 }
 
-static struct id *_collide_identifier(const char *name) {
-	return _find_identifier(name, _choose_id_table(scope), CHECK_ID_NOT_EXIST);
+static struct id *_collide_identifier(const char *name, int id_type) {
+	if (id_type == ID_STRING)
+		return _find_identifier(name, _choose_id_table(GLOBAL_TABLE),
+								CHECK_ID_NOT_EXIST);
+	else
+		return _find_identifier(name, _choose_id_table(scope),
+								CHECK_ID_NOT_EXIST);
 }
 
 static struct id *_add_identifier(const char *name, int id_type, int data_type,
 								  struct id **id_table) {
 	struct id *id_wanted;
 
-	struct id *id_collision = _collide_identifier(name);
+	struct id *id_collision = _collide_identifier(name, id_type);
 	if (id_collision) {
 		if (ID_IS_CONST(id_collision)) {
 			return id_collision;
