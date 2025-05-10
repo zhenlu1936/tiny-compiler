@@ -391,7 +391,7 @@ static void asm_code(struct tac *code) {
 			return;
 
 		case TAC_IFZ:
-			asm_cond("JEZ", code->id_2, code->id_2->name);
+			asm_cond("JEZ", code->id_1, code->id_2->name);
 			return;
 
 		case TAC_LABEL:
