@@ -1,3 +1,4 @@
+// hjj: tbd, float num
 #include "e_obj.h"
 
 #include <ctype.h>
@@ -149,6 +150,7 @@ static void asm_cmp(int op, struct id *a, struct id *b, struct id *c) {
 		reg_c = reg_alloc(c);
 	}
 
+	asm_write_back(reg_b);
 	input_str(obj_file, "	SUB R%u,R%u\n", reg_b, reg_c);
 	input_str(obj_file, "	TST R%u\n", reg_b);
 
@@ -213,7 +215,7 @@ static void asm_cmp(int op, struct id *a, struct id *b, struct id *c) {
 	rdesc_fill(reg_b, a, MODIFIED);
 }
 
-static void asm_cond(char *op, struct id *a, char *l) {
+static void asm_cond(char *op, struct id *a, const char *l) {
 	for (int r = R_GEN; r < R_NUM; r++) asm_write_back(r);
 
 	if (a != NULL) {
@@ -245,7 +247,7 @@ static void asm_call(struct id *a, struct id *b) {
 			  tof + oon); /* store return addr */
 	oon += 4;
 	input_str(obj_file, "	LOD R2,R2+%d\n", tof + oon - 8); /* load new bp */
-	input_str(obj_file, "	JMP %s\n", (char *)b); /* jump to new func */
+	input_str(obj_file, "	JMP %s\n", b->name); /* jump to new func */
 	if (a != NULL) {
 		r = reg_alloc(a);
 		input_str(obj_file, "	LOD R%u,R%u\n", r, R_TP);
@@ -289,7 +291,7 @@ static void asm_tail() {
 }
 
 static void asm_str(struct id *s) {
-	char *t = s->name; /* The text */
+	const char *t = s->name; /* The text */
 	int i;
 
 	input_str(obj_file, "L%u:\n", s->label); /* Label for the string */
@@ -350,11 +352,6 @@ static void asm_code(struct tac *code) {
 		case TAC_DIVIDE:
 			asm_bin("DIV", code->id_1, code->id_2, code->id_3);
 			return;
-
-			// hjj: tbd
-			// case TAC_NEG:
-			// asm_bin("SUB", c->id_1, mk_const(0), c->id_2);
-			// return;
 
 		case TAC_EQ:
 		case TAC_NE:

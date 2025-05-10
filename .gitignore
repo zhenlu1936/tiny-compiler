@@ -1,7 +1,9 @@
 # output
 build/
-tac.txt*
-test.c.*
+# tac.txt*
+# test.c.*
+test/*.x
+test/*.s
 
 # reference from ysj
 object/
