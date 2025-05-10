@@ -86,7 +86,7 @@ static void asm_load(int r, struct id *s) {
 			break;
 
 		case ID_STRING:
-			input_str(obj_file, "	LOD R%u,L%u\n", r, s->label);
+			input_str(obj_file, "	LOD R%u,label_%u\n", r, s->label);
 			break;
 	}
 
@@ -294,7 +294,7 @@ static void asm_str(struct id *s) {
 	const char *t = s->name; /* The text */
 	int i;
 
-	input_str(obj_file, "L%u:\n", s->label); /* Label for the string */
+	input_str(obj_file, "label_%u:\n", s->label); /* Label for the string */
 	input_str(obj_file, "	DBS ");			 /* Label for the string */
 
 	for (i = 1; t[i + 1] != 0; i++) {
@@ -391,7 +391,7 @@ static void asm_code(struct tac *code) {
 			return;
 
 		case TAC_IFZ:
-			asm_cond("JEZ", code->id_2, code->id_1->name);
+			asm_cond("JEZ", code->id_2, code->id_2->name);
 			return;
 
 		case TAC_LABEL:

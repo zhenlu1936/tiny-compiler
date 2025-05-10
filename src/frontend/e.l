@@ -50,9 +50,10 @@
 
 \"[^\"]*\" { 
 			//char* tmp = process_string(strdup(yytext));
-			char* tmp = strdup(yytext);
-			strcpy(yylval.string,tmp);
-			free(tmp);
+			// char* tmp = strdup(yytext);
+			// strcpy(yylval.string,tmp);
+			// free(tmp);
+			yylval.string = strdup(yytext); 
 			return TEXT;
 		}
 

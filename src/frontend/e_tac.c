@@ -66,6 +66,9 @@ static struct id *_add_identifier(const char *name, int id_type, int data_type,
 	id_wanted->next = *id_table;
 	*id_table = id_wanted;
 	id_wanted->offset = -1; /* Unset address */
+	if (id_type == ID_STRING) {
+		id_wanted->label = label_amount++;
+	}
 
 	return id_wanted;
 }
@@ -80,7 +83,12 @@ struct id *find_func(const char *name) {
 }
 
 struct id *add_identifier(const char *name, int id_type, int data_type) {
-	return _add_identifier(name, id_type, data_type, _choose_id_table(scope));
+	if (id_type == ID_STRING)
+		return _add_identifier(name, id_type, data_type,
+							   _choose_id_table(GLOBAL_TABLE));
+	else
+		return _add_identifier(name, id_type, data_type,
+							   _choose_id_table(scope));
 }
 
 void init_tac() {
