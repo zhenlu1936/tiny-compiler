@@ -9,7 +9,8 @@ TESTDIR := test
 # Sources and generated files
 SRCS := $(FRTDIR)/e_proc.c   \
 		$(FRTDIR)/e_tac.c    \
-		$(SRCDIR)/e_main.c	 
+		$(FRTDIR)/e_obj.c	 \
+		$(FRTDIR)/e_main.c	 
 INCS := $(INCDIR)/e_proc.h   \
 		$(INCDIR)/e_tac.h    
 LEX_SRC := $(FRTDIR)/e.l
@@ -42,7 +43,7 @@ $(TARGET): $(SRCS) $(LEX_SRC) $(YACC_SRC) $(INCS) | $(BUILDDIR)
 	$(CC) $(CFLAGS) -o $@ $(LEX_C) $(YACC_C) $(SRCS)
 
 clean:
-	rm -rf $(BUILDDIR) tac.txt
+	rm -rf $(BUILDDIR) $(TESTDIR)/*.s $(TESTDIR)/*.x
 
 test: all
 	./$(TARGET) ./$(TESTDIR)/test.c

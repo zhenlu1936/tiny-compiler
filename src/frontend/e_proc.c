@@ -337,7 +337,7 @@ struct op *process_assign(char *name, struct op *exp) {
 /*****function&program*****/
 // 处理整个程序，输出code
 struct op *process_program(struct op *program) {
-	printf("program compiled to tac!\n");
+	// printf("program compiled to tac!\n");
 
 	tac_head = program->code;
 
@@ -373,6 +373,7 @@ struct op *process_function_head(int data_type, char *name) {
 }
 
 // 处理函数参数列表的末尾，加入标识符
+// hjj: tbd, stack push
 struct op *process_parameter_list_end(int data_type, char *name) {
 	struct op *parameter = new_op();
 
