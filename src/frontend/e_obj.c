@@ -465,9 +465,9 @@ void tac_to_obj() {
 
 	struct tac *cur;
 	for (cur = tac_head; cur != NULL; cur = cur->next) {
-		input_str(obj_file, "\n	# ");
+		input_str(obj_file, "\n\t# ");
 		output_tac(obj_file, cur);
-		input_str(obj_file, "\n");
+		// input_str(obj_file, "\n");
 		asm_code(cur);
 	}
 

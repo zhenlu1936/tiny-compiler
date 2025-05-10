@@ -6,6 +6,7 @@
 #include "e_tac.h"
 
 struct tac *tac_head;
+static struct tac *arg_list_head;
 
 /*****expression*****/
 // 处理形如"a=a op b"的表达式
@@ -17,6 +18,7 @@ struct op *process_calculate(struct op *exp_l, struct op *exp_r, int cal) {
 	struct id *exp_l_addr = exp_l->addr;
 	struct id *exp_r_addr = exp_r->addr;
 
+	cat_tac(exp, NEW_TAC_1(TAC_VAR, t));
 	cat_op(exp, exp_l);	 // 拼接exp和exp_l的code
 	cat_op(exp, exp_r);	 // 拼接exp和exp_r的code
 	cat_tac(
@@ -88,6 +90,7 @@ struct op *process_inc(char *name, int pos) {
 	struct id *num = add_identifier("1", ID_NUM, NO_DATA);
 	inc_exp->addr = t;
 
+	cat_tac(inc_exp, NEW_TAC_1(TAC_VAR, t));
 	if (pos == INC_HEAD) {
 		cat_tac(inc_exp, NEW_TAC_3(TAC_PLUS, t, var, num));
 		cat_tac(inc_exp, NEW_TAC_2(TAC_ASSIGN, var, t));
@@ -108,6 +111,7 @@ struct op *process_dec(char *name, int pos) {
 	struct id *num = add_identifier("1", ID_NUM, NO_DATA);
 	dec_exp->addr = t;
 
+	cat_tac(dec_exp, NEW_TAC_1(TAC_VAR, t));
 	if (pos == INC_HEAD) {
 		cat_tac(dec_exp, NEW_TAC_3(TAC_MINUS, t, var, num));
 		cat_tac(dec_exp, NEW_TAC_2(TAC_ASSIGN, var, t));
@@ -119,14 +123,26 @@ struct op *process_dec(char *name, int pos) {
 	return dec_exp;
 }
 
-// 处理表达式列表的末尾，在调用函数时生成实参
-struct op *process_expression_list_end(struct op *arg_exp) {
+// 处理实参列表
+struct op *process_argument_list(struct op *raw_exp_list) {
+	struct op *argument_list = new_op();
+
+	cat_op(argument_list, raw_exp_list);
+	cat_tac(argument_list, arg_list_head);
+
+	return argument_list;
+}
+
+// 处理表达式列表的开端，在调用函数时生成实参
+struct op *process_expression_list_head(struct op *arg_exp) {
 	struct op *exp = new_op();
 
-	struct id *exp_temp = arg_exp->addr;
+	struct id *exp_temp = arg_exp->addr;  // not *temp var*
+	struct tac *arg = NEW_TAC_1(TAC_ARG, exp_temp);
+	arg->next = NULL;
+	arg_list_head = arg;
 
 	cat_op(exp, arg_exp);
-	cat_tac(exp, NEW_TAC_1(TAC_ARG, exp_temp));
 
 	return exp;
 }
@@ -136,11 +152,13 @@ struct op *process_expression_list(struct op *arg_list_pre,
 								   struct op *arg_exp) {
 	struct op *exp_list = new_op();
 
-	struct id *exp_temp = arg_exp->addr;
+	struct id *exp_temp = arg_exp->addr;  // not *temp var*
+	struct tac *arg = NEW_TAC_1(TAC_ARG, exp_temp);
+	arg->next = arg_list_head;
+	arg_list_head = arg;
 
-	cat_op(exp_list, arg_list_pre);
 	cat_op(exp_list, arg_exp);
-	cat_tac(exp_list, NEW_TAC_1(TAC_ARG, exp_temp));
+	cat_op(exp_list, arg_list_pre);
 
 	return exp_list;
 }
@@ -269,6 +287,7 @@ struct op *process_call(char *name, struct op *arg_list) {
 	struct id *t = new_temp();
 	call_stat->addr = t;
 
+	cat_tac(call_stat, NEW_TAC_1(TAC_VAR, t));
 	cat_op(call_stat, arg_list);
 	cat_tac(call_stat, NEW_TAC_2(TAC_CALL, t, func));
 
@@ -372,9 +391,8 @@ struct op *process_function_head(int data_type, char *name) {
 	return function_head;
 }
 
-// 处理函数参数列表的末尾，加入标识符
-// hjj: tbd, stack push
-struct op *process_parameter_list_end(int data_type, char *name) {
+// 处理函数参数列表的开端，加入标识符
+struct op *process_parameter_list_head(int data_type, char *name) {
 	struct op *parameter = new_op();
 
 	struct id *var = add_identifier(name, ID_VAR, data_type);

@@ -121,7 +121,7 @@ function_head : data_type IDENTIFIER
 
 parameter_list : data_type IDENTIFIER               
                             {
-                                $$ = process_parameter_list_end($1,$2);
+                                $$ = process_parameter_list_head($1,$2);
                             }
 | parameter_list ',' data_type IDENTIFIER               
                             {
@@ -319,20 +319,21 @@ argument_list  :
                             }
 | expression_list
                             {
-                                $$ = cpy_op($1);
+                                // $$ = cpy_op($1);
+                                $$ = process_argument_list($1);
                             }
 ;
 
 /*************************************/
 /**************** exp ****************/
 /*************************************/
-expression_list : expression
-                            {
-                                $$ = process_expression_list_end($1);
-                            }
-|  expression_list ',' expression
+expression_list : expression_list ',' expression
                             {
                                 $$ = process_expression_list($1,$3);
+                            }
+|  expression
+                            {
+                                $$ = process_expression_list_head($1);
                             }
 ;
 

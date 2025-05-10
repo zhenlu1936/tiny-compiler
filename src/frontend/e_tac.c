@@ -352,7 +352,7 @@ void output_tac(FILE *f, struct tac *code) {
 			perror("unknown TAC opcode");
 			break;
 	}
-	fflush(f);
+	// fflush(f);
 	// code = code->next;
 	// }
 }
