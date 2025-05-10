@@ -1,6 +1,6 @@
 # output
 build/
-# tac.txt*
+tac.txt*
 # test.c.*
 test/*.x
 test/*.s
