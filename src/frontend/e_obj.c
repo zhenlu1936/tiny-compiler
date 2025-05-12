@@ -16,11 +16,13 @@ int oof; /* offset of formal */
 int oon; /* offset of next frame */
 struct rdesc rdesc[R_NUM];
 
+// 清除寄存器描述符
 static void rdesc_clear(int r) {
 	rdesc[r].var = NULL;
 	rdesc[r].mod = 0;
 }
 
+// 填充寄存器描述符
 static void rdesc_fill(int r, struct id *s, int mod) {
 	int old;
 	for (old = R_GEN; old < R_NUM; old++) {
@@ -33,6 +35,7 @@ static void rdesc_fill(int r, struct id *s, int mod) {
 	rdesc[r].mod = mod;
 }
 
+// 写回寄存器内容至内存
 static void asm_write_back(int r) {
 	if ((rdesc[r].var != NULL) && rdesc[r].mod) {
 		if (rdesc[r].var->scope == 1) /* local var */
@@ -49,6 +52,7 @@ static void asm_write_back(int r) {
 	}
 }
 
+// 加载符号到寄存器
 static void asm_load(int r, struct id *s) {
 	/* already in a reg */
 	for (int i = R_GEN; i < R_NUM; i++) {
@@ -93,6 +97,7 @@ static void asm_load(int r, struct id *s) {
 	// rdesc_fill(r, s, UNMODIFIED);
 }
 
+// 寻找或分配符号对应的寄存器
 static int reg_alloc(struct id *s) {
 	int r;
 
@@ -130,6 +135,7 @@ static int reg_alloc(struct id *s) {
 	return random;
 }
 
+// 生成二元运算对应的汇编代码
 static void asm_bin(char *op, struct id *a, struct id *b, struct id *c) {
 	int reg_b = -1, reg_c = -1;
 
@@ -138,10 +144,12 @@ static void asm_bin(char *op, struct id *a, struct id *b, struct id *c) {
 		reg_c = reg_alloc(c);
 	}
 
+	asm_write_back(reg_b); // modified
 	input_str(obj_file, "	%s R%u,R%u\n", op, reg_b, reg_c);
 	rdesc_fill(reg_b, a, MODIFIED);
 }
 
+// 生成比较运算对应的汇编代码
 static void asm_cmp(int op, struct id *a, struct id *b, struct id *c) {
 	int reg_b = -1, reg_c = -1;
 
@@ -150,7 +158,7 @@ static void asm_cmp(int op, struct id *a, struct id *b, struct id *c) {
 		reg_c = reg_alloc(c);
 	}
 
-	asm_write_back(reg_b);
+	asm_write_back(reg_b); // modified
 	input_str(obj_file, "	SUB R%u,R%u\n", reg_b, reg_c);
 	input_str(obj_file, "	TST R%u\n", reg_b);
 
@@ -215,6 +223,7 @@ static void asm_cmp(int op, struct id *a, struct id *b, struct id *c) {
 	rdesc_fill(reg_b, a, MODIFIED);
 }
 
+// 生成条件跳转(ifz)对应的汇编代码
 static void asm_cond(char *op, struct id *a, const char *l) {
 	for (int r = R_GEN; r < R_NUM; r++) asm_write_back(r);
 
@@ -236,6 +245,7 @@ static void asm_cond(char *op, struct id *a, const char *l) {
 	input_str(obj_file, "	%s %s\n", op, l);
 }
 
+// 生成函数调用对应的汇编代码
 static void asm_call(struct id *a, struct id *b) {
 	int r;
 	for (int r = R_GEN; r < R_NUM; r++) asm_write_back(r);
@@ -256,6 +266,7 @@ static void asm_call(struct id *a, struct id *b) {
 	oon = 0;
 }
 
+// 生成函数返回对应的汇编代码
 static void asm_return(struct id *a) {
 	for (int r = R_GEN; r < R_NUM; r++) asm_write_back(r);
 	for (int r = R_GEN; r < R_NUM; r++) rdesc_clear(r);
@@ -270,6 +281,7 @@ static void asm_return(struct id *a) {
 	input_str(obj_file, "	JMP R3\n");		   /* return */
 }
 
+// 生成开始段，初始化栈和出口
 static void asm_head() {
 	char head[] =
 		"	# head\n"
@@ -281,6 +293,7 @@ static void asm_head() {
 	input_str(obj_file, "%s", head);
 }
 
+// 生成结束段
 static void asm_tail() {
 	char tail[] =
 		"\n	# tail\n"
@@ -290,12 +303,13 @@ static void asm_tail() {
 	input_str(obj_file, "%s", tail);
 }
 
+// 生成字符串数据段
 static void asm_str(struct id *s) {
 	const char *t = s->name; /* The text */
 	int i;
 
 	input_str(obj_file, "label_%u:\n", s->label); /* Label for the string */
-	input_str(obj_file, "	DBS ");			 /* Label for the string */
+	input_str(obj_file, "	DBS ");				  /* Label for the string */
 
 	for (i = 1; t[i + 1] != 0; i++) {
 		if (t[i] == '\\') {
@@ -315,7 +329,8 @@ static void asm_str(struct id *s) {
 	input_str(obj_file, "0\n"); /* End of string */
 }
 
-void asm_static(void) {
+// 生成静态数据段
+static void asm_static(void) {
 	int i;
 
 	struct id *sl;
@@ -329,6 +344,7 @@ void asm_static(void) {
 	input_str(obj_file, "STACK:\n");
 }
 
+// 根据单条三地址码，生成汇编代码
 static void asm_code(struct tac *code) {
 	int r;
 
@@ -454,6 +470,7 @@ static void asm_code(struct tac *code) {
 	}
 }
 
+// 根据source_to_tac生成的三地址码，生成汇编代码
 void tac_to_obj() {
 	tof = LOCAL_OFF; /* TOS allows space for link info */
 	oof = FORMAL_OFF;

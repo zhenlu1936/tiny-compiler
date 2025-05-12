@@ -1,3 +1,6 @@
+#ifndef E_TAC_H
+#define E_TAC_H
+
 #include <stdarg.h>
 #include <stdio.h>
 
@@ -162,3 +165,5 @@ const char *data_to_str(int type);
 void output_tac(FILE *f, struct tac *code);
 void source_to_tac(FILE *f, struct tac *code);
 void input_str(FILE *f, const char *format, ...);
+
+#endif
