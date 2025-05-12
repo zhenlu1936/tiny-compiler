@@ -10,14 +10,15 @@ int main() {
 	c = 0.1;
 	for (i = 0; i < 5; i++) {
 		b = add(a--, b);
+		if (a == b) {
+			break;
+		}
 	}
 	while (a == 1) {
 		a = 1;
 	}
 	if (i == b) {
-		if (a != b) {
-			i = 5;
-		}
+		i = 5;
 	}
 	// c = 1;
 	return a;

@@ -1,7 +1,9 @@
 #include "code_generator.h"
+
+#include <stdio.h>
+
 #include "asm_generator.h"
 #include "reg_manager.h"
-#include <stdio.h>
 
 // 将三地址码翻译为目标代码
 
@@ -79,12 +81,12 @@ void asm_code(struct tac *code) {
 			return;
 
 		case TAC_ASSIGN:
-			r = reg_alloc(code->id_2);
+			r = reg_find(code->id_2);
 			rdesc_fill(r, code->id_1, MODIFIED);
 			return;
 
 		case TAC_INPUT:
-			r = reg_alloc(code->id_1);
+			r = reg_find(code->id_1);
 			input_str(obj_file, "	IN\n");
 			input_str(obj_file, "	LOD R%u,R15\n", r);
 			rdesc[r].mod = MODIFIED;
@@ -92,11 +94,11 @@ void asm_code(struct tac *code) {
 
 		case TAC_OUTPUT:
 			if (code->id_1->id_type == ID_VAR) {
-				r = reg_alloc(code->id_1);
+				r = reg_find(code->id_1);
 				input_str(obj_file, "	LOD R15,R%u\n", r);
 				input_str(obj_file, "	OUTN\n");
 			} else if (code->id_1->id_type == ID_STRING) {
-				r = reg_alloc(code->id_1);
+				r = reg_find(code->id_1);
 				input_str(obj_file, "	LOD R15,R%u\n", r);
 				input_str(obj_file, "	OUTS\n");
 			}
@@ -117,7 +119,7 @@ void asm_code(struct tac *code) {
 			return;
 
 		case TAC_ARG:
-			r = reg_alloc(code->id_1);
+			r = reg_find(code->id_1);
 			input_str(obj_file, "	STO (R2+%d),R%u\n", tof + oon, r);
 			oon += 4;
 			return;
@@ -176,7 +178,8 @@ void asm_head() {
 		"	LOD R2,STACK\n"
 		"	STO (R2),0\n"
 		"	LOD R4,EXIT\n"
-		"	STO (R2+4),R4\n";
+		"	STO (R2+4),R4\n"
+		"	JMP main\n";  // 跳转到main
 
 	input_str(obj_file, "%s", head);
 }
@@ -194,7 +197,7 @@ void asm_str(struct id *s) {
 	const char *t = s->name; /* The text */
 	int i;
 
-	input_str(obj_file, "label_%u:\n", s->label); /* Label for the string */
+	input_str(obj_file, "L%u:\n", s->label); /* Label for the string */
 	input_str(obj_file, "	DBS ");			 /* Label for the string */
 
 	for (i = 1; t[i + 1] != 0; i++) {

@@ -1,20 +1,22 @@
 #include "asm_generator.h"
-#include "reg_manager.h"
+
 #include <stdio.h>
 
+#include "reg_manager.h"
+
 // 全局变量定义
-int tos = 0; // 栈顶偏移
-int tof = 0; // 栈帧偏移
-int oof = 0; // 参数偏移
-int oon = 0; // 临时偏移
+int tos = 0;  // 栈顶偏移
+int tof = 0;  // 栈帧偏移
+int oof = 0;  // 参数偏移
+int oon = 0;  // 临时偏移
 
 void asm_bin(char *op, struct id *a, struct id *b, struct id *c) {
 	int reg_b = -1, reg_c = -1;
 	while (reg_b == reg_c) {
-		reg_b = reg_alloc(b);
-		reg_c = reg_alloc(c);
+		reg_b = reg_find(b);
+		reg_c = reg_find(c);
 	}
-	asm_write_back(reg_b);
+	// asm_write_back(reg_b);
 	input_str(obj_file, "	%s R%u,R%u\n", op, reg_b, reg_c);
 	rdesc_fill(reg_b, a, MODIFIED);
 }
@@ -22,89 +24,80 @@ void asm_bin(char *op, struct id *a, struct id *b, struct id *c) {
 // hjj
 // void asm_cmp(char* op, struct id *a, struct id *b, struct id *c) {
 void asm_cmp(int op, struct id *a, struct id *b, struct id *c) {
-    int reg_b = -1, reg_c = -1;
+	int reg_temp = -1, reg_c = -1;
 
-    // 分配寄存器，确保 b 和 c 不在同一个寄存器中
-    while (reg_b == reg_c) {
-        reg_b = reg_alloc(b);
-        reg_c = reg_alloc(c);
-    }
-	asm_write_back(reg_b);
-	
 	// hjj
-	/*
-    // 使用 CMP 指令比较寄存器 reg_b 和 reg_c 的值
-    input_str(obj_file, "    CMP R%u,R%u\n", reg_b, reg_c);
-	// 根据操作符生成对应的条件跳转指令
-	input_str(obj_file, "    LOD R3,R1+40\n");
-	input_str(obj_file, "    %s R3\n", op);
-	input_str(obj_file, "    LOD R%u,0\n", reg_b); // 设置结果为 0
-	input_str(obj_file, "    LOD R3,R1+24\n");
-	input_str(obj_file, "    JMP R3\n");
-	input_str(obj_file, "    LOD R%u,1\n", reg_b); // 设置结果为 1
-	*/
-    input_str(obj_file, "	SUB R%u,R%u\n", reg_b, reg_c);
-	input_str(obj_file, "	TST R%u\n", reg_b);
+	// 分配寄存器，确保 temp 和 c 不在同一个寄存器中
+	while (reg_temp == reg_c) {
+		// reg_temp = reg_find(b);
+		reg_temp = reg_alloc(b);
+		reg_c = reg_find(c);
+	}
+	// asm_write_back(reg_temp);
+
+	// hjj: 原逻辑有误，不能直接修改存储符号的寄存器，应该分配一个临时符号
+	input_str(obj_file, "	SUB R%u,R%u\n", reg_temp, reg_c);
+	input_str(obj_file, "	TST R%u\n", reg_temp);
 
 	switch (op) {
 		case TAC_EQ:
 			input_str(obj_file, "	LOD R3,R1+40\n");
 			input_str(obj_file, "	JEZ R3\n");
-			input_str(obj_file, "	LOD R%u,0\n", reg_b);
+			input_str(obj_file, "	LOD R%u,0\n", reg_temp);
 			input_str(obj_file, "	LOD R3,R1+24\n");
 			input_str(obj_file, "	JMP R3\n");
-			input_str(obj_file, "	LOD R%u,1\n", reg_b);
+			input_str(obj_file, "	LOD R%u,1\n", reg_temp);
 			break;
 
 		case TAC_NE:
 			input_str(obj_file, "	LOD R3,R1+40\n");
 			input_str(obj_file, "	JEZ R3\n");
-			input_str(obj_file, "	LOD R%u,1\n", reg_b);
+			input_str(obj_file, "	LOD R%u,1\n", reg_temp);
 			input_str(obj_file, "	LOD R3,R1+24\n");
 			input_str(obj_file, "	JMP R3\n");
-			input_str(obj_file, "	LOD R%u,0\n", reg_b);
+			input_str(obj_file, "	LOD R%u,0\n", reg_temp);
 			break;
 
 		case TAC_LT:
 			input_str(obj_file, "	LOD R3,R1+40\n");
 			input_str(obj_file, "	JLZ R3\n");
-			input_str(obj_file, "	LOD R%u,0\n", reg_b);
+			input_str(obj_file, "	LOD R%u,0\n", reg_temp);
 			input_str(obj_file, "	LOD R3,R1+24\n");
 			input_str(obj_file, "	JMP R3\n");
-			input_str(obj_file, "	LOD R%u,1\n", reg_b);
+			input_str(obj_file, "	LOD R%u,1\n", reg_temp);
 			break;
 
 		case TAC_LE:
 			input_str(obj_file, "	LOD R3,R1+40\n");
 			input_str(obj_file, "	JGZ R3\n");
-			input_str(obj_file, "	LOD R%u,1\n", reg_b);
+			input_str(obj_file, "	LOD R%u,1\n", reg_temp);
 			input_str(obj_file, "	LOD R3,R1+24\n");
 			input_str(obj_file, "	JMP R3\n");
-			input_str(obj_file, "	LOD R%u,0\n", reg_b);
+			input_str(obj_file, "	LOD R%u,0\n", reg_temp);
 			break;
 
 		case TAC_GT:
 			input_str(obj_file, "	LOD R3,R1+40\n");
 			input_str(obj_file, "	JGZ R3\n");
-			input_str(obj_file, "	LOD R%u,0\n", reg_b);
+			input_str(obj_file, "	LOD R%u,0\n", reg_temp);
 			input_str(obj_file, "	LOD R3,R1+24\n");
 			input_str(obj_file, "	JMP R3\n");
-			input_str(obj_file, "	LOD R%u,1\n", reg_b);
+			input_str(obj_file, "	LOD R%u,1\n", reg_temp);
 			break;
 
 		case TAC_GE:
 			input_str(obj_file, "	LOD R3,R1+40\n");
 			input_str(obj_file, "	JLZ R3\n");
-			input_str(obj_file, "	LOD R%u,1\n", reg_b);
+			input_str(obj_file, "	LOD R%u,1\n", reg_temp);
 			input_str(obj_file, "	LOD R3,R1+24\n");
 			input_str(obj_file, "	JMP R3\n");
-			input_str(obj_file, "	LOD R%u,0\n", reg_b);
+			input_str(obj_file, "	LOD R%u,0\n", reg_temp);
 			break;
 	}
 
-    // 清除寄存器描述符并更新 a 的描述符
-    rdesc_clear(reg_b);
-    rdesc_fill(reg_b, a, MODIFIED);
+	// 清除寄存器描述符并更新 a 的描述符
+	rdesc_clear(reg_temp);
+	rdesc_fill(reg_temp, a, MODIFIED);
 }
 
 void asm_cond(char *op, struct id *a, const char *l) {
@@ -122,7 +115,7 @@ void asm_cond(char *op, struct id *a, const char *l) {
 			input_str(obj_file, "	TST R%u\n", r);
 		else
 			input_str(obj_file, "	TST R%u\n",
-					  reg_alloc(a)); /* Load into new register */
+					  reg_find(a)); /* Load into new register */
 	}
 
 	input_str(obj_file, "	%s %s\n", op, l);
@@ -141,7 +134,7 @@ void asm_call(struct id *a, struct id *b) {
 	input_str(obj_file, "	LOD R2,R2+%d\n", tof + oon - 8); /* load new bp */
 	input_str(obj_file, "	JMP %s\n", b->name); /* jump to new func */
 	if (a != NULL) {
-		r = reg_alloc(a);
+		r = reg_find(a);
 		input_str(obj_file, "	LOD R%u,R%u\n", r, R_TP);
 		rdesc[r].mod = MODIFIED;
 	}
