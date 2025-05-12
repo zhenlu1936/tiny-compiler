@@ -11,14 +11,14 @@ int oof = 0;  // 参数偏移
 int oon = 0;  // 临时偏移
 
 void asm_bin(char *op, struct id *a, struct id *b, struct id *c) {
-	int reg_b = -1, reg_c = -1;
-	while (reg_b == reg_c) {
-		reg_b = reg_find(b);
+	int reg_temp = -1, reg_c = -1;
+	while (reg_temp == reg_c) {
+		reg_temp = reg_alloc(b);
 		reg_c = reg_find(c);
 	}
 	// asm_write_back(reg_b);
-	input_str(obj_file, "	%s R%u,R%u\n", op, reg_b, reg_c);
-	rdesc_fill(reg_b, a, MODIFIED);
+	input_str(obj_file, "	%s R%u,R%u\n", op, reg_temp, reg_c);
+	rdesc_fill(reg_temp, a, MODIFIED);
 }
 
 // hjj
