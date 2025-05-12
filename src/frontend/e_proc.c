@@ -298,7 +298,7 @@ struct op *process_continue() {
 	struct op *continue_stat = new_op();
 
 	struct id *dummy_label = NULL;
-	cat_tac(continue_stat, NEW_TAC_1(TAC_LABEL, dummy_label));
+	cat_tac(continue_stat, NEW_TAC_1(TAC_GOTO, dummy_label));
 
 	continue_stat->next = block_top->continue_stat_head;
 	block_top->continue_stat_head = continue_stat;

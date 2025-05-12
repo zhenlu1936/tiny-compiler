@@ -1,15 +1,15 @@
 int main() {
 	int a, b;
 	while (1) {
-		break;
+		continue;
 		while (1) {
-			break;
+			continue;;
 			while (1) {
-				break;
+				continue;
 			}
-			break;
+			continue;
 		}
-		break;
+		continue;
 	}
 	return 0;
 }
