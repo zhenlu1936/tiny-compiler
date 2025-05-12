@@ -24,12 +24,13 @@ static void rdesc_clear(int r) {
 
 // 填充寄存器描述符
 static void rdesc_fill(int r, struct id *s, int mod) {
-	int old;
-	for (old = R_GEN; old < R_NUM; old++) {
-		if (rdesc[old].var == s) {
-			rdesc_clear(old);
-		}
-	}
+	// hjj: 需要允许同时有数个寄存器存储同一符号的情况，在asm_cmp会用到
+	// int old;
+	// for (old = R_GEN; old < R_NUM; old++) {
+	// 	if (rdesc[old].var == s) {
+	// 		rdesc_clear(old);
+	// 	}
+	// }
 
 	rdesc[r].var = s;
 	rdesc[r].mod = mod;
@@ -72,6 +73,7 @@ static void asm_load(int r, struct id *s) {
 			input_str(obj_file, "	LOD R%u,%u\n", r, s->num);
 			break;
 
+		case ID_TEMP:
 		case ID_VAR:
 			if (s->scope == 1) /* local var */
 			{
@@ -90,23 +92,16 @@ static void asm_load(int r, struct id *s) {
 			break;
 
 		case ID_STRING:
-			input_str(obj_file, "	LOD R%u,label_%u\n", r, s->label);
+			input_str(obj_file, "	LOD R%u,L%u\n", r, s->label);
 			break;
 	}
 
 	// rdesc_fill(r, s, UNMODIFIED);
 }
 
-// 寻找或分配符号对应的寄存器
+// 为符号分配寄存器
 static int reg_alloc(struct id *s) {
 	int r;
-
-	/* already in a register */
-	for (r = R_GEN; r < R_NUM; r++) {
-		if (rdesc[r].var == s) {
-			return r;
-		}
-	}
 
 	/* empty register */
 	for (r = R_GEN; r < R_NUM; r++) {
@@ -135,92 +130,106 @@ static int reg_alloc(struct id *s) {
 	return random;
 }
 
-// 生成二元运算对应的汇编代码
-static void asm_bin(char *op, struct id *a, struct id *b, struct id *c) {
-	int reg_b = -1, reg_c = -1;
+// 寻找符号对应的寄存器
+static int reg_find(struct id *s) {
+	int r;
 
-	while (reg_b == reg_c) {
-		reg_b = reg_alloc(b);
-		reg_c = reg_alloc(c);
+	/* already in a register */
+	for (r = R_GEN; r < R_NUM; r++) {
+		if (rdesc[r].var == s) {
+			return r;
+		}
 	}
 
-	asm_write_back(reg_b); // modified
-	input_str(obj_file, "	%s R%u,R%u\n", op, reg_b, reg_c);
-	rdesc_fill(reg_b, a, MODIFIED);
+	return reg_alloc(s);
+}
+
+// 生成二元运算对应的汇编代码
+static void asm_bin(char *op, struct id *a, struct id *b, struct id *c) {
+	int reg_temp = -1, reg_c = -1;
+
+	while (reg_temp == reg_c) {
+		reg_temp = reg_alloc(b);
+		reg_c = reg_find(c);
+	}
+
+	asm_write_back(reg_temp); // modified
+	input_str(obj_file, "	%s R%u,R%u\n", op, reg_temp, reg_c);
+	rdesc_fill(reg_temp, a, MODIFIED);
 }
 
 // 生成比较运算对应的汇编代码
 static void asm_cmp(int op, struct id *a, struct id *b, struct id *c) {
-	int reg_b = -1, reg_c = -1;
+	int reg_temp = -1, reg_c = -1;
 
-	while (reg_b == reg_c) {
-		reg_b = reg_alloc(b);
-		reg_c = reg_alloc(c);
+	while (reg_temp == reg_c) {
+		reg_temp = reg_alloc(b);
+		reg_c = reg_find(c);
 	}
 
-	asm_write_back(reg_b); // modified
-	input_str(obj_file, "	SUB R%u,R%u\n", reg_b, reg_c);
-	input_str(obj_file, "	TST R%u\n", reg_b);
+	asm_write_back(reg_temp); // modified
+	input_str(obj_file, "	SUB R%u,R%u\n", reg_temp, reg_c);
+	input_str(obj_file, "	TST R%u\n", reg_temp);
 
 	switch (op) {
 		case TAC_EQ:
 			input_str(obj_file, "	LOD R3,R1+40\n");
 			input_str(obj_file, "	JEZ R3\n");
-			input_str(obj_file, "	LOD R%u,0\n", reg_b);
+			input_str(obj_file, "	LOD R%u,0\n", reg_temp);
 			input_str(obj_file, "	LOD R3,R1+24\n");
 			input_str(obj_file, "	JMP R3\n");
-			input_str(obj_file, "	LOD R%u,1\n", reg_b);
+			input_str(obj_file, "	LOD R%u,1\n", reg_temp);
 			break;
 
 		case TAC_NE:
 			input_str(obj_file, "	LOD R3,R1+40\n");
 			input_str(obj_file, "	JEZ R3\n");
-			input_str(obj_file, "	LOD R%u,1\n", reg_b);
+			input_str(obj_file, "	LOD R%u,1\n", reg_temp);
 			input_str(obj_file, "	LOD R3,R1+24\n");
 			input_str(obj_file, "	JMP R3\n");
-			input_str(obj_file, "	LOD R%u,0\n", reg_b);
+			input_str(obj_file, "	LOD R%u,0\n", reg_temp);
 			break;
 
 		case TAC_LT:
 			input_str(obj_file, "	LOD R3,R1+40\n");
 			input_str(obj_file, "	JLZ R3\n");
-			input_str(obj_file, "	LOD R%u,0\n", reg_b);
+			input_str(obj_file, "	LOD R%u,0\n", reg_temp);
 			input_str(obj_file, "	LOD R3,R1+24\n");
 			input_str(obj_file, "	JMP R3\n");
-			input_str(obj_file, "	LOD R%u,1\n", reg_b);
+			input_str(obj_file, "	LOD R%u,1\n", reg_temp);
 			break;
 
 		case TAC_LE:
 			input_str(obj_file, "	LOD R3,R1+40\n");
 			input_str(obj_file, "	JGZ R3\n");
-			input_str(obj_file, "	LOD R%u,1\n", reg_b);
+			input_str(obj_file, "	LOD R%u,1\n", reg_temp);
 			input_str(obj_file, "	LOD R3,R1+24\n");
 			input_str(obj_file, "	JMP R3\n");
-			input_str(obj_file, "	LOD R%u,0\n", reg_b);
+			input_str(obj_file, "	LOD R%u,0\n", reg_temp);
 			break;
 
 		case TAC_GT:
 			input_str(obj_file, "	LOD R3,R1+40\n");
 			input_str(obj_file, "	JGZ R3\n");
-			input_str(obj_file, "	LOD R%u,0\n", reg_b);
+			input_str(obj_file, "	LOD R%u,0\n", reg_temp);
 			input_str(obj_file, "	LOD R3,R1+24\n");
 			input_str(obj_file, "	JMP R3\n");
-			input_str(obj_file, "	LOD R%u,1\n", reg_b);
+			input_str(obj_file, "	LOD R%u,1\n", reg_temp);
 			break;
 
 		case TAC_GE:
 			input_str(obj_file, "	LOD R3,R1+40\n");
 			input_str(obj_file, "	JLZ R3\n");
-			input_str(obj_file, "	LOD R%u,1\n", reg_b);
+			input_str(obj_file, "	LOD R%u,1\n", reg_temp);
 			input_str(obj_file, "	LOD R3,R1+24\n");
 			input_str(obj_file, "	JMP R3\n");
-			input_str(obj_file, "	LOD R%u,0\n", reg_b);
+			input_str(obj_file, "	LOD R%u,0\n", reg_temp);
 			break;
 	}
 
 	/* Delete c from the descriptors and insert a */
-	rdesc_clear(reg_b);
-	rdesc_fill(reg_b, a, MODIFIED);
+	rdesc_clear(reg_temp);
+	rdesc_fill(reg_temp, a, MODIFIED);
 }
 
 // 生成条件跳转(ifz)对应的汇编代码
@@ -239,7 +248,7 @@ static void asm_cond(char *op, struct id *a, const char *l) {
 			input_str(obj_file, "	TST R%u\n", r);
 		else
 			input_str(obj_file, "	TST R%u\n",
-					  reg_alloc(a)); /* Load into new register */
+					  reg_find(a)); /* Load into new register */
 	}
 
 	input_str(obj_file, "	%s %s\n", op, l);
@@ -259,7 +268,7 @@ static void asm_call(struct id *a, struct id *b) {
 	input_str(obj_file, "	LOD R2,R2+%d\n", tof + oon - 8); /* load new bp */
 	input_str(obj_file, "	JMP %s\n", b->name); /* jump to new func */
 	if (a != NULL) {
-		r = reg_alloc(a);
+		r = reg_find(a);
 		input_str(obj_file, "	LOD R%u,R%u\n", r, R_TP);
 		rdesc[r].mod = MODIFIED;
 	}
@@ -288,7 +297,8 @@ static void asm_head() {
 		"	LOD R2,STACK\n"
 		"	STO (R2),0\n"
 		"	LOD R4,EXIT\n"
-		"	STO (R2+4),R4\n";
+		"	STO (R2+4),R4\n"
+		"	JMP main\n";
 
 	input_str(obj_file, "%s", head);
 }
@@ -308,7 +318,7 @@ static void asm_str(struct id *s) {
 	const char *t = s->name; /* The text */
 	int i;
 
-	input_str(obj_file, "label_%u:\n", s->label); /* Label for the string */
+	input_str(obj_file, "L%u:\n", s->label); /* Label for the string */
 	input_str(obj_file, "	DBS ");				  /* Label for the string */
 
 	for (i = 1; t[i + 1] != 0; i++) {
@@ -379,12 +389,12 @@ static void asm_code(struct tac *code) {
 			return;
 
 		case TAC_ASSIGN:
-			r = reg_alloc(code->id_2);
+			r = reg_find(code->id_2);
 			rdesc_fill(r, code->id_1, MODIFIED);
 			return;
 
 		case TAC_INPUT:
-			r = reg_alloc(code->id_1);
+			r = reg_find(code->id_1);
 			input_str(obj_file, "	IN\n");
 			input_str(obj_file, "	LOD R%u,R15\n", r);
 			rdesc[r].mod = MODIFIED;
@@ -392,11 +402,11 @@ static void asm_code(struct tac *code) {
 
 		case TAC_OUTPUT:
 			if (code->id_1->id_type == ID_VAR) {
-				r = reg_alloc(code->id_1);
+				r = reg_find(code->id_1);
 				input_str(obj_file, "	LOD R15,R%u\n", r);
 				input_str(obj_file, "	OUTN\n");
 			} else if (code->id_1->id_type == ID_STRING) {
-				r = reg_alloc(code->id_1);
+				r = reg_find(code->id_1);
 				input_str(obj_file, "	LOD R15,R%u\n", r);
 				input_str(obj_file, "	OUTS\n");
 			}
@@ -417,7 +427,7 @@ static void asm_code(struct tac *code) {
 			return;
 
 		case TAC_ARG:
-			r = reg_alloc(code->id_1);
+			r = reg_find(code->id_1);
 			input_str(obj_file, "	STO (R2+%d),R%u\n", tof + oon, r);
 			oon += 4;
 			return;

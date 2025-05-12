@@ -197,7 +197,7 @@ struct id *new_temp(int data_type) {
 
 struct id *new_label() {
 	NAME_ALLOC(label);
-	sprintf(label, "label_%d", label_amount++);
+	sprintf(label, "L%d", label_amount++);
 	return add_identifier(label, ID_TEMP, NO_DATA);
 }
 
