@@ -297,6 +297,9 @@ struct op *process_break() {
 	struct id *dummy_label = NULL;
 	cat_tac(break_stat, NEW_TAC_1(TAC_GOTO, dummy_label));
 
+	if(block_top==NULL){
+		perror("continue not in a loop");
+	}
 	break_stat->next = block_top->break_stat_head;
 	block_top->break_stat_head = break_stat;
 
@@ -310,6 +313,9 @@ struct op *process_continue() {
 	struct id *dummy_label = NULL;
 	cat_tac(continue_stat, NEW_TAC_1(TAC_GOTO, dummy_label));
 
+	if(block_top==NULL){
+		perror("continue not in a loop");
+	}
 	continue_stat->next = block_top->continue_stat_head;
 	block_top->continue_stat_head = continue_stat;
 

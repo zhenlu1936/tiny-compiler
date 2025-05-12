@@ -1,0 +1,528 @@
+diff --git a/src/frontend/asm_generator.c b/src/frontend/asm_generator.c
+index 1c87232..a1d1b66 100644
+--- a/src/frontend/asm_generator.c
++++ b/src/frontend/asm_generator.c
+@@ -1,20 +1,22 @@
+ #include "asm_generator.h"
+-#include "reg_manager.h"
++
+ #include <stdio.h>
+ 
++#include "reg_manager.h"
++
+ // 全局变量定义
+-int tos = 0; // 栈顶偏移
+-int tof = 0; // 栈帧偏移
+-int oof = 0; // 参数偏移
+-int oon = 0; // 临时偏移
++int tos = 0;  // 栈顶偏移
++int tof = 0;  // 栈帧偏移
++int oof = 0;  // 参数偏移
++int oon = 0;  // 临时偏移
+ 
+ void asm_bin(char *op, struct id *a, struct id *b, struct id *c) {
+ 	int reg_b = -1, reg_c = -1;
+ 	while (reg_b == reg_c) {
+-		reg_b = reg_alloc(b);
+-		reg_c = reg_alloc(c);
++		reg_b = reg_find(b);
++		reg_c = reg_find(c);
+ 	}
+-	asm_write_back(reg_b);
++	// asm_write_back(reg_b);
+ 	input_str(obj_file, "	%s R%u,R%u\n", op, reg_b, reg_c);
+ 	rdesc_fill(reg_b, a, MODIFIED);
+ }
+@@ -22,89 +24,80 @@ void asm_bin(char *op, struct id *a, struct id *b, struct id *c) {
+ // hjj
+ // void asm_cmp(char* op, struct id *a, struct id *b, struct id *c) {
+ void asm_cmp(int op, struct id *a, struct id *b, struct id *c) {
+-    int reg_b = -1, reg_c = -1;
+-
+-    // 分配寄存器，确保 b 和 c 不在同一个寄存器中
+-    while (reg_b == reg_c) {
+-        reg_b = reg_alloc(b);
+-        reg_c = reg_alloc(c);
+-    }
+-	asm_write_back(reg_b);
+-	
++	int reg_temp = -1, reg_c = -1;
++
+ 	// hjj
+-	/*
+-    // 使用 CMP 指令比较寄存器 reg_b 和 reg_c 的值
+-    input_str(obj_file, "    CMP R%u,R%u\n", reg_b, reg_c);
+-	// 根据操作符生成对应的条件跳转指令
+-	input_str(obj_file, "    LOD R3,R1+40\n");
+-	input_str(obj_file, "    %s R3\n", op);
+-	input_str(obj_file, "    LOD R%u,0\n", reg_b); // 设置结果为 0
+-	input_str(obj_file, "    LOD R3,R1+24\n");
+-	input_str(obj_file, "    JMP R3\n");
+-	input_str(obj_file, "    LOD R%u,1\n", reg_b); // 设置结果为 1
+-	*/
+-    input_str(obj_file, "	SUB R%u,R%u\n", reg_b, reg_c);
+-	input_str(obj_file, "	TST R%u\n", reg_b);
++	// 分配寄存器，确保 temp 和 c 不在同一个寄存器中
++	while (reg_temp == reg_c) {
++		// reg_temp = reg_find(b);
++		reg_temp = reg_alloc(b);
++		reg_c = reg_find(c);
++	}
++	// asm_write_back(reg_temp);
++
++	// hjj: 原逻辑有误，不能直接修改存储符号的寄存器，应该分配一个临时符号
++	input_str(obj_file, "	SUB R%u,R%u\n", reg_temp, reg_c);
++	input_str(obj_file, "	TST R%u\n", reg_temp);
+ 
+ 	switch (op) {
+ 		case TAC_EQ:
+ 			input_str(obj_file, "	LOD R3,R1+40\n");
+ 			input_str(obj_file, "	JEZ R3\n");
+-			input_str(obj_file, "	LOD R%u,0\n", reg_b);
++			input_str(obj_file, "	LOD R%u,0\n", reg_temp);
+ 			input_str(obj_file, "	LOD R3,R1+24\n");
+ 			input_str(obj_file, "	JMP R3\n");
+-			input_str(obj_file, "	LOD R%u,1\n", reg_b);
++			input_str(obj_file, "	LOD R%u,1\n", reg_temp);
+ 			break;
+ 
+ 		case TAC_NE:
+ 			input_str(obj_file, "	LOD R3,R1+40\n");
+ 			input_str(obj_file, "	JEZ R3\n");
+-			input_str(obj_file, "	LOD R%u,1\n", reg_b);
++			input_str(obj_file, "	LOD R%u,1\n", reg_temp);
+ 			input_str(obj_file, "	LOD R3,R1+24\n");
+ 			input_str(obj_file, "	JMP R3\n");
+-			input_str(obj_file, "	LOD R%u,0\n", reg_b);
++			input_str(obj_file, "	LOD R%u,0\n", reg_temp);
+ 			break;
+ 
+ 		case TAC_LT:
+ 			input_str(obj_file, "	LOD R3,R1+40\n");
+ 			input_str(obj_file, "	JLZ R3\n");
+-			input_str(obj_file, "	LOD R%u,0\n", reg_b);
++			input_str(obj_file, "	LOD R%u,0\n", reg_temp);
+ 			input_str(obj_file, "	LOD R3,R1+24\n");
+ 			input_str(obj_file, "	JMP R3\n");
+-			input_str(obj_file, "	LOD R%u,1\n", reg_b);
++			input_str(obj_file, "	LOD R%u,1\n", reg_temp);
+ 			break;
+ 
+ 		case TAC_LE:
+ 			input_str(obj_file, "	LOD R3,R1+40\n");
+ 			input_str(obj_file, "	JGZ R3\n");
+-			input_str(obj_file, "	LOD R%u,1\n", reg_b);
++			input_str(obj_file, "	LOD R%u,1\n", reg_temp);
+ 			input_str(obj_file, "	LOD R3,R1+24\n");
+ 			input_str(obj_file, "	JMP R3\n");
+-			input_str(obj_file, "	LOD R%u,0\n", reg_b);
++			input_str(obj_file, "	LOD R%u,0\n", reg_temp);
+ 			break;
+ 
+ 		case TAC_GT:
+ 			input_str(obj_file, "	LOD R3,R1+40\n");
+ 			input_str(obj_file, "	JGZ R3\n");
+-			input_str(obj_file, "	LOD R%u,0\n", reg_b);
++			input_str(obj_file, "	LOD R%u,0\n", reg_temp);
+ 			input_str(obj_file, "	LOD R3,R1+24\n");
+ 			input_str(obj_file, "	JMP R3\n");
+-			input_str(obj_file, "	LOD R%u,1\n", reg_b);
++			input_str(obj_file, "	LOD R%u,1\n", reg_temp);
+ 			break;
+ 
+ 		case TAC_GE:
+ 			input_str(obj_file, "	LOD R3,R1+40\n");
+ 			input_str(obj_file, "	JLZ R3\n");
+-			input_str(obj_file, "	LOD R%u,1\n", reg_b);
++			input_str(obj_file, "	LOD R%u,1\n", reg_temp);
+ 			input_str(obj_file, "	LOD R3,R1+24\n");
+ 			input_str(obj_file, "	JMP R3\n");
+-			input_str(obj_file, "	LOD R%u,0\n", reg_b);
++			input_str(obj_file, "	LOD R%u,0\n", reg_temp);
+ 			break;
+ 	}
+ 
+-    // 清除寄存器描述符并更新 a 的描述符
+-    rdesc_clear(reg_b);
+-    rdesc_fill(reg_b, a, MODIFIED);
++	// 清除寄存器描述符并更新 a 的描述符
++	rdesc_clear(reg_temp);
++	rdesc_fill(reg_temp, a, MODIFIED);
+ }
+ 
+ void asm_cond(char *op, struct id *a, const char *l) {
+@@ -122,7 +115,7 @@ void asm_cond(char *op, struct id *a, const char *l) {
+ 			input_str(obj_file, "	TST R%u\n", r);
+ 		else
+ 			input_str(obj_file, "	TST R%u\n",
+-					  reg_alloc(a)); /* Load into new register */
++					  reg_find(a)); /* Load into new register */
+ 	}
+ 
+ 	input_str(obj_file, "	%s %s\n", op, l);
+@@ -141,7 +134,7 @@ void asm_call(struct id *a, struct id *b) {
+ 	input_str(obj_file, "	LOD R2,R2+%d\n", tof + oon - 8); /* load new bp */
+ 	input_str(obj_file, "	JMP %s\n", b->name); /* jump to new func */
+ 	if (a != NULL) {
+-		r = reg_alloc(a);
++		r = reg_find(a);
+ 		input_str(obj_file, "	LOD R%u,R%u\n", r, R_TP);
+ 		rdesc[r].mod = MODIFIED;
+ 	}
+diff --git a/src/frontend/code_generator.c b/src/frontend/code_generator.c
+index 7030681..fc31a6c 100644
+--- a/src/frontend/code_generator.c
++++ b/src/frontend/code_generator.c
+@@ -1,7 +1,9 @@
+ #include "code_generator.h"
++
++#include <stdio.h>
++
+ #include "asm_generator.h"
+ #include "reg_manager.h"
+-#include <stdio.h>
+ 
+ // 将三地址码翻译为目标代码
+ 
+@@ -79,12 +81,12 @@ void asm_code(struct tac *code) {
+ 			return;
+ 
+ 		case TAC_ASSIGN:
+-			r = reg_alloc(code->id_2);
++			r = reg_find(code->id_2);
+ 			rdesc_fill(r, code->id_1, MODIFIED);
+ 			return;
+ 
+ 		case TAC_INPUT:
+-			r = reg_alloc(code->id_1);
++			r = reg_find(code->id_1);
+ 			input_str(obj_file, "	IN\n");
+ 			input_str(obj_file, "	LOD R%u,R15\n", r);
+ 			rdesc[r].mod = MODIFIED;
+@@ -92,11 +94,11 @@ void asm_code(struct tac *code) {
+ 
+ 		case TAC_OUTPUT:
+ 			if (code->id_1->id_type == ID_VAR) {
+-				r = reg_alloc(code->id_1);
++				r = reg_find(code->id_1);
+ 				input_str(obj_file, "	LOD R15,R%u\n", r);
+ 				input_str(obj_file, "	OUTN\n");
+ 			} else if (code->id_1->id_type == ID_STRING) {
+-				r = reg_alloc(code->id_1);
++				r = reg_find(code->id_1);
+ 				input_str(obj_file, "	LOD R15,R%u\n", r);
+ 				input_str(obj_file, "	OUTS\n");
+ 			}
+@@ -117,7 +119,7 @@ void asm_code(struct tac *code) {
+ 			return;
+ 
+ 		case TAC_ARG:
+-			r = reg_alloc(code->id_1);
++			r = reg_find(code->id_1);
+ 			input_str(obj_file, "	STO (R2+%d),R%u\n", tof + oon, r);
+ 			oon += 4;
+ 			return;
+@@ -176,7 +178,8 @@ void asm_head() {
+ 		"	LOD R2,STACK\n"
+ 		"	STO (R2),0\n"
+ 		"	LOD R4,EXIT\n"
+-		"	STO (R2+4),R4\n";
++		"	STO (R2+4),R4\n"
++		"	JMP main\n";  // 跳转到main
+ 
+ 	input_str(obj_file, "%s", head);
+ }
+@@ -194,7 +197,7 @@ void asm_str(struct id *s) {
+ 	const char *t = s->name; /* The text */
+ 	int i;
+ 
+-	input_str(obj_file, "label_%u:\n", s->label); /* Label for the string */
++	input_str(obj_file, "L%u:\n", s->label); /* Label for the string */
+ 	input_str(obj_file, "	DBS ");			 /* Label for the string */
+ 
+ 	for (i = 1; t[i + 1] != 0; i++) {
+diff --git a/src/frontend/e_tac.c b/src/frontend/e_tac.c
+index bfd8264..14b1dce 100644
+--- a/src/frontend/e_tac.c
++++ b/src/frontend/e_tac.c
+@@ -197,7 +197,7 @@ struct id *new_temp(int data_type) {
+ 
+ struct id *new_label() {
+ 	NAME_ALLOC(label);
+-	sprintf(label, "label_%d", label_amount++);
++	sprintf(label, "L%d", label_amount++);
+ 	return add_identifier(label, ID_TEMP, NO_DATA);
+ }
+ 
+diff --git a/src/frontend/reg_manager.c b/src/frontend/reg_manager.c
+index e200747..5d64b9c 100644
+--- a/src/frontend/reg_manager.c
++++ b/src/frontend/reg_manager.c
+@@ -1,4 +1,5 @@
+ #include "reg_manager.h"
++
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <time.h>
+@@ -8,89 +9,110 @@ struct rdesc rdesc[R_NUM];
+ 
+ // 清除寄存器描述符
+ void rdesc_clear(int r) {
+-    rdesc[r].var = NULL;
+-    rdesc[r].mod = 0;
++	rdesc[r].var = NULL;
++	rdesc[r].mod = 0;
+ }
+ 
+ // 填充寄存器描述符
+ void rdesc_fill(int r, struct id *s, int mod) {
+-    for (int old = R_GEN; old < R_NUM; old++) {
+-        if (rdesc[old].var == s) {
+-            rdesc_clear(old);
+-        }
+-    }
+-    rdesc[r].var = s;
+-    rdesc[r].mod = mod;
++	// hjj: 需要允许同时有数个寄存器存储同一符号的情况，在asm_cmp会用到
++	// for (int old = R_GEN; old < R_NUM; old++) {
++	// 	if (rdesc[old].var == s) {	// 若已有寄存器存储该符号，则清除该寄存器
++	// 		rdesc_clear(old);
++	// 	}
++	// }
++	rdesc[r].var = s;
++	rdesc[r].mod = mod;
+ }
+ 
+ // 写回寄存器内容到内存
+ void asm_write_back(int r) {
+-    if ((rdesc[r].var != NULL) && rdesc[r].mod) {
+-        if (rdesc[r].var->scope == 1) { // 局部变量
+-            input_str(obj_file, "    STO (R%u+%u),R%u\n", R_BP, rdesc[r].var->offset, r);
+-        } else { // 全局变量
+-            input_str(obj_file, "    LOD R%u,STATIC\n", R_TP);
+-            input_str(obj_file, "    STO (R%u+%u),R%u\n", R_TP, rdesc[r].var->offset, r);
+-        }
+-        rdesc[r].mod = UNMODIFIED;
+-    }
++	if ((rdesc[r].var != NULL) && rdesc[r].mod) {
++		if (rdesc[r].var->scope == 1) {	 // 局部变量从栈上加载
++			input_str(obj_file, "    STO (R%u+%u),R%u\n", R_BP,
++					  rdesc[r].var->offset, r);
++		} else {  // 全局变量从静态数据段加载
++			input_str(obj_file, "    LOD R%u,STATIC\n", R_TP);
++			input_str(obj_file, "    STO (R%u+%u),R%u\n", R_TP,
++					  rdesc[r].var->offset, r);
++		}
++		rdesc[r].mod = UNMODIFIED;
++	}
+ }
+ 
+ // 加载变量到寄存器
+ void asm_load(int r, struct id *s) {
+-    for (int i = R_GEN; i < R_NUM; i++) {
+-        if (rdesc[i].var == s) {
+-            input_str(obj_file, "    LOD R%u,R%u\n", r, i);
+-            return;
+-        }
+-    }
++	for (int i = R_GEN; i < R_NUM; i++) {
++		if (rdesc[i].var ==
++			s) {  // 若已有寄存器存储目标符号，则直接将该寄存器的值存入寄存器r
++			input_str(obj_file, "    LOD R%u,R%u\n", r, i);
++			return;
++		}
++	}
+ 
+-    switch (s->id_type) {
+-        case ID_NUM:
+-            input_str(obj_file, "    LOD R%u,%u\n", r, s->num);
+-            break;
+-        case ID_VAR:
+-            if (s->scope == 1) {
+-                input_str(obj_file, "    LOD R%u,(R%u+%d)\n", r, R_BP, s->offset);
+-            } else {
+-                input_str(obj_file, "    LOD R%u,STATIC\n", R_TP);
+-                input_str(obj_file, "    LOD R%u,(R%u+%d)\n", r, R_TP, s->offset);
+-            }
+-            break;
+-        case ID_STRING:
+-            input_str(obj_file, "    LOD R%u,label_%u\n", r, s->label);
+-            break;
+-    }
++	// 若尚无寄存器存储目标符号
++	switch (s->id_type) {
++		case ID_NUM:
++			input_str(obj_file, "    LOD R%u,%u\n", r, s->num);
++			break;
++		case ID_TEMP:
++		case ID_VAR:
++			if (s->scope == 1) {  // 局部变量从栈上加载
++				if (s->offset >= 0)
++					input_str(obj_file, "    LOD R%u,(R%u+%d)\n", r, R_BP,
++							  s->offset);
++				else
++					input_str(obj_file, "    LOD R%u,(R%u%d)\n", r, R_BP,
++							  s->offset);
++			} else {  // 全局变量从静态数据段加载
++				input_str(obj_file, "    LOD R%u,STATIC\n", R_TP);
++				input_str(obj_file, "    LOD R%u,(R%u+%d)\n", r, R_TP,
++						  s->offset);
++			}
++			break;
++		case ID_STRING:
++			input_str(obj_file, "    LOD R%u,L%u\n", r, s->label);
++			break;
++		default:
++			perror("what type?");
++			printf("id type: %d\n", s->id_type);
++	}
+ }
+ 
+-// 分配寄存器
+-int reg_alloc(struct id *s) {
+-    for (int r = R_GEN; r < R_NUM; r++) {
+-        if (rdesc[r].var == s) {
+-            return r;
+-        }
+-    }
++// 寻找存储目标符号的寄存器
++int reg_find(struct id *s) {
++	for (int r = R_GEN; r < R_NUM; r++) {
++		if (rdesc[r].var == s) {  // 若已有寄存器存储该符号
++			return r;
++		}
++	}
+ 
+-    for (int r = R_GEN; r < R_NUM; r++) {
+-        if (rdesc[r].var == NULL) {
+-            asm_load(r, s);
+-            rdesc_fill(r, s, UNMODIFIED);
+-            return r;
+-        }
+-    }
++	return reg_alloc(s);  // 若无寄存器存储该符号，则分配一个新的
++}
++
++// 为目标符号分配寄存器
++int reg_alloc(struct id *s) {
++	for (int r = R_GEN; r < R_NUM; r++) {
++		if (rdesc[r].var == NULL) {	 // 若有寄存器未存储符号
++			asm_load(r, s);
++			rdesc_fill(r, s, UNMODIFIED);
++			return r;
++		}
++	}
+ 
+-    for (int r = R_GEN; r < R_NUM; r++) {
+-        if (!rdesc[r].mod) {
+-            asm_load(r, s);
+-            rdesc_fill(r, s, UNMODIFIED);
+-            return r;
+-        }
+-    }
++	for (int r = R_GEN; r < R_NUM; r++) {
++		if (rdesc[r].mod == UNMODIFIED) {  // 若有寄存器未被修改
++			asm_load(r, s);
++			rdesc_fill(r, s, UNMODIFIED);
++			return r;
++		}
++	}
+ 
+-    srand(time(NULL));
+-    int random = (rand() % (R_NUM - R_GEN)) + R_GEN;
+-    asm_write_back(random);
+-    asm_load(random, s);
+-    rdesc_fill(random, s, UNMODIFIED);
+-    return random;
++	// 若所有寄存器都已被分配且都被修改，则随机挑选寄存器
++	srand(time(NULL));
++	int random = (rand() % (R_NUM - R_GEN)) + R_GEN;
++	asm_write_back(random);
++	asm_load(random, s);
++	rdesc_fill(random, s, UNMODIFIED);
++	return random;
+ }
+\ No newline at end of file
+diff --git a/src/include/reg_manager.h b/src/include/reg_manager.h
+index c2d7665..0f3d95d 100644
+--- a/src/include/reg_manager.h
++++ b/src/include/reg_manager.h
+@@ -35,6 +35,7 @@ void rdesc_clear(int r);
+ void rdesc_fill(int r, struct id *s, int mod);
+ void asm_write_back(int r);
+ void asm_load(int r, struct id *s);
++int reg_find(struct id *s);
+ int reg_alloc(struct id *s);
+ 
+ #endif // REG_MANAGER_H
+\ No newline at end of file
+diff --git a/test/test.c b/test/test.c
+index db2fb9f..1ec8393 100644
+--- a/test/test.c
++++ b/test/test.c
+@@ -10,14 +10,15 @@ int main() {
+ 	c = 0.1;
+ 	for (i = 0; i < 5; i++) {
+ 		b = add(a--, b);
++		if (a == b) {
++			break;
++		}
+ 	}
+ 	while (a == 1) {
+ 		a = 1;
+ 	}
+ 	if (i == b) {
+-		if (a != b) {
+-			i = 5;
+-		}
++		i = 5;
+ 	}
+ 	// c = 1;
+ 	return a;
+diff --git a/test/ysj_func.m b/test/ysj_func.m
+new file mode 100644
+index 0000000..3a21e15
+--- /dev/null
++++ b/test/ysj_func.m
+@@ -0,0 +1,15 @@
++int add(int x,int y)
++{
++	return x+y;
++}
++
++int main() 
++{
++	int a,b,c;
++	input a;
++	input b;
++	c = add(a,b);
++	output c;
++	output "\n";
++	return 0;
++}
+\ No newline at end of file
+diff --git a/test/ysj_if.m b/test/ysj_if.m
+new file mode 100644
+index 0000000..44c7c89
+--- /dev/null
++++ b/test/ysj_if.m
+@@ -0,0 +1,19 @@
++int main()
++{
++	int i,j,k;
++	input i;
++	input j;
++	if(i==j)
++	{ 
++		// output "equal\n";
++		k=1;
++	}
++	else
++	{ 
++		// output "not equal\n";
++		k=1;
++	}
++	k=i+j;
++	output k;
++	output "\n";
++}
