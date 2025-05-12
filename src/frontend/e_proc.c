@@ -213,6 +213,7 @@ static void push_block_stack(struct id *label_begin, struct id *label_end) {
 static void pop_block_stack() {
 	struct block *block_poped = block_top;
 	if (block_top == NULL) {
+		perror("stack is empty");
 	}
 	block_top = block_top->prev;
 	free(block_poped);
