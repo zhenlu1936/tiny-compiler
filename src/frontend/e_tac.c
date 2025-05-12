@@ -189,10 +189,10 @@ struct tac *new_tac(int type, struct id *id_1, struct id *id_2,
 	return ntac;
 }
 
-struct id *new_temp() {
+struct id *new_temp(int data_type) {
 	NAME_ALLOC(buf);
 	sprintf(buf, "t%d", temp_amount++);
-	return add_identifier(buf, ID_TEMP, DATA_INT);
+	return add_identifier(buf, ID_TEMP, data_type);
 }
 
 struct id *new_label() {

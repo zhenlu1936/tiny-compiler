@@ -15,11 +15,14 @@ static struct block *block_top;
 struct op *process_calculate(struct op *exp_l, struct op *exp_r, int cal) {
 	struct op *exp = new_op();
 
-	struct id *t = new_temp();	// 分配临时变量
+	struct id *t = new_temp(exp_l->addr->data_type);	// 分配临时变量
 	exp->addr = t;
 	struct id *exp_l_addr = exp_l->addr;
 	struct id *exp_r_addr = exp_r->addr;
 
+	if (exp_l_addr->data_type != exp_r_addr->data_type) {
+		perror("wrong type");
+	}
 	cat_tac(exp, NEW_TAC_1(TAC_VAR, t));
 	cat_op(exp, exp_l);	 // 拼接exp和exp_l的code
 	cat_op(exp, exp_r);	 // 拼接exp和exp_r的code
@@ -36,12 +39,12 @@ struct op *process_calculate(struct op *exp_l, struct op *exp_r, int cal) {
 struct op *process_negative(struct op *exp) {
 	struct op *neg_exp = new_op();
 
-	struct id *t = new_temp();
-	struct id *exp_temp = exp->addr;
+	struct id *t = new_temp(exp->addr->data_type);
+	struct id *exp_addr = exp->addr;
 	neg_exp->addr = t;
 
 	cat_op(neg_exp, exp);
-	cat_tac(neg_exp, NEW_TAC_2(TAC_NEGATIVE, t, exp_temp));
+	cat_tac(neg_exp, NEW_TAC_2(TAC_NEGATIVE, t, exp_addr));
 
 	return neg_exp;
 }
@@ -87,11 +90,14 @@ struct op *process_identifier(char *name) {
 struct op *process_inc(char *name, int pos) {
 	struct op *inc_exp = new_op();
 
-	struct id *t = new_temp();
 	struct id *var = find_identifier(name);
+	struct id *t = new_temp(var->data_type);
 	struct id *num = add_identifier("1", ID_NUM, NO_DATA);
 	inc_exp->addr = t;
 
+	if (var->data_type != DATA_INT) {
+		perror("wrong type");
+	}
 	cat_tac(inc_exp, NEW_TAC_1(TAC_VAR, t));
 	if (pos == INC_HEAD) {
 		cat_tac(inc_exp, NEW_TAC_3(TAC_PLUS, t, var, num));
@@ -108,11 +114,14 @@ struct op *process_inc(char *name, int pos) {
 struct op *process_dec(char *name, int pos) {
 	struct op *dec_exp = new_op();
 
-	struct id *t = new_temp();
 	struct id *var = find_identifier(name);
+	struct id *t = new_temp(var->data_type);
 	struct id *num = add_identifier("1", ID_NUM, NO_DATA);
 	dec_exp->addr = t;
 
+	if (var->data_type != DATA_INT) {
+		perror("wrong type");
+	}
 	cat_tac(dec_exp, NEW_TAC_1(TAC_VAR, t));
 	if (pos == INC_HEAD) {
 		cat_tac(dec_exp, NEW_TAC_3(TAC_MINUS, t, var, num));
@@ -346,7 +355,7 @@ struct op *process_call(char *name, struct op *arg_list) {
 	struct op *call_stat = new_op();
 
 	struct id *func = find_func(name);
-	struct id *t = new_temp();
+	struct id *t = new_temp(func->data_type);
 	call_stat->addr = t;
 
 	cat_tac(call_stat, NEW_TAC_1(TAC_VAR, t));
