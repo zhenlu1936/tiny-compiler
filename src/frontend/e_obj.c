@@ -53,7 +53,7 @@ static void asm_write_back(int r) {
 	}
 }
 
-// hjj: 有优化余地
+// hjj: 有优化余地。先前已经找过一次，就不用再找
 // 加载符号到寄存器
 static void asm_load(int r, struct id *s) {
 	/* already in a reg */
