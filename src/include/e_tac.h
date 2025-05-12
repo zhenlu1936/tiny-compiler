@@ -155,7 +155,7 @@ struct op *cpy_op(struct op *src);
 struct op *new_op();
 struct tac *new_tac(int type, struct id *id_1, struct id *id_2,
 					struct id *id_3);
-struct id *new_temp();
+struct id *new_temp(int data_type);
 struct id *new_label();
 struct block *new_block();
 
