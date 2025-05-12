@@ -15,7 +15,7 @@ void rdesc_clear(int r) {
 
 // 填充寄存器描述符
 void rdesc_fill(int r, struct id *s, int mod) {
-	// hjj: 需要允许同时有数个寄存器存储同一符号的情况，在asm_cmp会用到
+	// hjj: 需要允许同时有数个寄存器存储同一符号的情况，在asm_cmp会用到。
 	// for (int old = R_GEN; old < R_NUM; old++) {
 	// 	if (rdesc[old].var == s) {	// 若已有寄存器存储该符号，则清除该寄存器
 	// 		rdesc_clear(old);
@@ -40,6 +40,7 @@ void asm_write_back(int r) {
 	}
 }
 
+// hjj: 有优化余地
 // 加载变量到寄存器
 void asm_load(int r, struct id *s) {
 	for (int i = R_GEN; i < R_NUM; i++) {
