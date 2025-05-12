@@ -2,8 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "e_obj.h"
-#include "e_tac.h"
+#include "code_generator.h"
 
 extern int yyparse();
 extern FILE *yyin;
@@ -43,6 +42,7 @@ int main(int argc, char *argv[]) {
 	yyparse();
 	source_to_tac(tac_file, tac_head);
 	printf("program compiled to tac!\n");
+
 	tac_to_obj();
 	printf("tac converted to obj!\n");
 
