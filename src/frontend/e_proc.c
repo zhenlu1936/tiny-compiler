@@ -2,11 +2,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "e_tac.h"
 
 struct tac *tac_head;
 static struct tac *arg_list_head;
+static struct block *block_top;
 
 /*****expression*****/
 // 处理形如"a=a op b"的表达式
@@ -60,15 +62,15 @@ struct op *process_int(int integer) {
 
 // 分配浮点型数字符号
 struct op *process_float(double floatnum) {
-	struct op *int_exp = new_op();
+	struct op *float_exp = new_op();
 
 	BUF_ALLOC(buf);
 	sprintf(buf, "%f", floatnum);
 	struct id *var = add_identifier(buf, ID_NUM, DATA_FLOAT);
 	var->num.num_float = floatnum;
-	int_exp->addr = var;
+	float_exp->addr = var;
 
-	return int_exp;
+	return float_exp;
 }
 
 // 分配标识符
@@ -202,27 +204,59 @@ struct op *process_variable_list(struct op *var_list_pre, char *name) {
 	return variable_list;
 }
 
+static void push_block_stack(struct id *label_begin, struct id *label_end) {
+	struct block *block_pushed = new_block(label_begin, label_end);
+	block_pushed->prev = block_top;
+	block_top = block_pushed;
+}
+
+static void pop_block_stack() {
+	struct block *block_poped = block_top;
+	if (block_top == NULL) {
+	}
+	block_top = block_top->prev;
+	free(block_poped);
+}
+
+static void parse_labels() {
+	while (block_top->continue_stat_head) {
+		block_top->continue_stat_head->code->id_1 = block_top->label_begin;
+		block_top->continue_stat_head = block_top->continue_stat_head->next;
+	}
+	while (block_top->break_stat_head) {
+		block_top->break_stat_head->code->id_1 = block_top->label_end;
+		block_top->break_stat_head = block_top->break_stat_head->next;
+	}
+}
+
+void block_initialize() {
+	struct id *label_begin = new_label();
+	struct id *label_end = new_label();
+	push_block_stack(label_begin, label_end);
+}
+
 // 处理for语句块
 struct op *process_for(struct op *initialization_exp, struct op *condition_exp,
 					   struct op *iteration_exp, struct op *block) {
 	struct op *for_stat = new_op();
 
-	struct id *label_1 = new_label();
-	struct id *label_2 = new_label();
 	struct id *exp_temp = condition_exp->addr;
 
+	parse_labels();
 	cat_op(for_stat, initialization_exp);
-	cat_tac(for_stat, NEW_TAC_1(TAC_LABEL, label_1));
+	cat_tac(for_stat, NEW_TAC_1(TAC_LABEL, block_top->label_begin));
 	cat_op(for_stat, condition_exp);
 	if (exp_temp) {	 // 如果condition_exp不为空，则拼接label_2
-		cat_tac(for_stat, NEW_TAC_2(TAC_IFZ, exp_temp, label_2));
+		cat_tac(for_stat, NEW_TAC_2(TAC_IFZ, exp_temp, block_top->label_end));
 	}
 	cat_op(for_stat, block);
 	cat_op(for_stat, iteration_exp);
-	cat_tac(for_stat, NEW_TAC_1(TAC_GOTO, label_1));
+	cat_tac(for_stat, NEW_TAC_1(TAC_GOTO, block_top->label_begin));
 	if (exp_temp) {	 // 如果condition_exp不为空，则拼接label_2
-		cat_tac(for_stat, NEW_TAC_1(TAC_LABEL, label_2));
+		cat_tac(for_stat, NEW_TAC_1(TAC_LABEL, block_top->label_end));
 	}
+
+	pop_block_stack();
 
 	return for_stat;
 }
@@ -231,18 +265,45 @@ struct op *process_for(struct op *initialization_exp, struct op *condition_exp,
 struct op *process_while(struct op *condition_exp, struct op *block) {
 	struct op *while_stat = new_op();
 
-	struct id *label_1 = new_label();
-	struct id *label_2 = new_label();
 	struct id *exp_temp = condition_exp->addr;
 
-	cat_tac(while_stat, NEW_TAC_1(TAC_LABEL, label_1));
+	parse_labels();
+	cat_tac(while_stat, NEW_TAC_1(TAC_LABEL, block_top->label_begin));
 	cat_op(while_stat, condition_exp);
-	cat_tac(while_stat, NEW_TAC_2(TAC_IFZ, exp_temp, label_2));
+	cat_tac(while_stat, NEW_TAC_2(TAC_IFZ, exp_temp, block_top->label_end));
 	cat_op(while_stat, block);
-	cat_tac(while_stat, NEW_TAC_1(TAC_GOTO, label_1));
-	cat_tac(while_stat, NEW_TAC_1(TAC_LABEL, label_2));
+	cat_tac(while_stat, NEW_TAC_1(TAC_GOTO, block_top->label_begin));
+	cat_tac(while_stat, NEW_TAC_1(TAC_LABEL, block_top->label_end));
+
+	pop_block_stack();
 
 	return while_stat;
+}
+
+// 处理break语句
+struct op *process_break() {
+	struct op *break_stat = new_op();
+
+	struct id *dummy_label = NULL;
+	cat_tac(break_stat, NEW_TAC_1(TAC_GOTO, dummy_label));
+
+	break_stat->next = block_top->break_stat_head;
+	block_top->break_stat_head = break_stat;
+
+	return break_stat;
+}
+
+// 处理continue语句
+struct op *process_continue() {
+	struct op *continue_stat = new_op();
+
+	struct id *dummy_label = NULL;
+	cat_tac(continue_stat, NEW_TAC_1(TAC_LABEL, dummy_label));
+
+	continue_stat->next = block_top->continue_stat_head;
+	block_top->continue_stat_head = continue_stat;
+
+	return continue_stat;
 }
 
 struct op *process_if_only(struct op *condition_exp, struct op *block) {
@@ -347,6 +408,12 @@ struct op *process_assign(char *name, struct op *exp) {
 	struct id *exp_temp = exp->addr;
 	assign_stat->addr = exp_temp;
 
+	if (var->data_type != exp_temp->data_type) {
+		perror("wrong type");
+		printf("var type: %d\tvar name: %s\n", var->data_type, var->name);
+		printf("exp type: %d\texp name: %s\n", exp_temp->data_type,
+			   exp_temp->name);
+	}
 	cat_op(assign_stat, exp);
 	cat_tac(assign_stat, NEW_TAC_2(TAC_ASSIGN, var, exp_temp));
 

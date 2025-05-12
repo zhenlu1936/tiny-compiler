@@ -24,6 +24,8 @@
 
 "return"  {  return RETURN;  }
 
+"break"  {  return BREAK;  }
+
 "continue"  {  return CONTINUE;  }
 
 "if"  {  return IF;  }
@@ -48,14 +50,7 @@
 
 [0-9]+\.[0-9]+  {  yylval.num_float = strtod(yytext,NULL); return NUM_FLOAT;  }
 
-\"[^\"]*\" { 
-			//char* tmp = process_string(strdup(yytext));
-			// char* tmp = strdup(yytext);
-			// strcpy(yylval.string,tmp);
-			// free(tmp);
-			yylval.string = strdup(yytext); 
-			return TEXT;
-		}
+\"[^\"]*\" {  yylval.string = strdup(yytext); return TEXT;  }
 
 "++"  {  return INC; }
 
@@ -75,7 +70,10 @@
 
 [ \t\r\n]
 
-. 	{	return *yytext; }
+"//".*  {/*ignored*/}
+"/*"([^\*]|(\*)*[^\*/])*(\*)*"*/"  {/*ignored*/}
+
+. 	{  return *yytext;  }
 
 %%
 

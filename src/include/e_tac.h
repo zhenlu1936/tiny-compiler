@@ -76,11 +76,6 @@
 
 #define NAME_ALLOC(name) char name[NAME_SIZE] = {0};
 
-// #define NEW_LABEL(label) \
-// 	NAME_ALLOC(label##_name); \
-// 	sprintf(label##_name,"label_%d",label_amount++); \
-// 	struct id *label = add_identifier(label##_name, ID_LABEL);
-
 #define NEW_TAC_0(type) new_tac(type, NULL, NULL, NULL)
 
 #define NEW_TAC_1(type, id_1) new_tac(type, id_1, NULL, NULL)
@@ -89,9 +84,9 @@
 
 #define NEW_TAC_3(type, id_1, id_2, id_3) new_tac(type, id_1, id_2, id_3)
 
-#define MALLOC_AND_SET_ZERO(pointer, len, type)     \
-	pointer = (type *)malloc((len) * sizeof(type)); \
-	memset(pointer, 0, (len) * sizeof(type));
+#define MALLOC_AND_SET_ZERO(pointer, amount, type)     \
+	pointer = (type *)malloc((amount) * sizeof(type)); \
+	memset(pointer, 0, (amount) * sizeof(type));
 
 #define ID_IS_CONST(id) (id->id_type == ID_NUM || id->id_type == ID_STRING)
 
@@ -105,8 +100,8 @@ struct id {
 	int id_type;
 	int data_type;	// control the type of 'num'
 	int scope;
-	int offset;	 // hjj: tbd
-	int label;	 // hjj: tbd
+	int offset;
+	int label;
 	struct id *next;
 };
 
@@ -124,13 +119,17 @@ struct tac {
 struct op {
 	struct tac *code;
 	struct id *addr;
+	struct op *next;  // used in continue and break
 };
 
-// // 变量声明
-// struct var_list {
-// 	struct id *var;
-// 	struct var_list *next;
-// };
+// used in continue and break
+struct block {
+	struct id *label_begin;
+	struct id *label_end;
+	struct op *continue_stat_head;
+	struct op *break_stat_head;
+	struct block *prev;
+};
 
 extern int scope;
 extern struct tac *tac_head;
@@ -158,6 +157,7 @@ struct tac *new_tac(int type, struct id *id_1, struct id *id_2,
 					struct id *id_3);
 struct id *new_temp();
 struct id *new_label();
+struct block *new_block();
 
 // 字符串处理
 const char *id_to_str(struct id *id);

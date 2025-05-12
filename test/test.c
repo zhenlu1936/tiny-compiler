@@ -14,10 +14,11 @@ int main() {
 	while (a == 1) {
 		a = 1;
 	}
-	if (c == b) {
+	if (i == b) {
 		if (a != b) {
-			c = 5;
+			i = 5;
 		}
 	}
-	return c;
+	// c = 1;
+	return a;
 }

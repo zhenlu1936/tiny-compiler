@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
 	yyparse();
 	source_to_tac(tac_file, tac_head);
 	printf("program compiled to tac!\n");
-	tac_to_obj();
+	// tac_to_obj();
 	printf("tac converted to obj!\n");
 
 	fclose(source_file);

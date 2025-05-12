@@ -68,6 +68,7 @@ static struct id *_add_identifier(const char *name, int id_type, int data_type,
 	strcpy(id_name, name);
 	id_wanted->name = id_name;
 	id_wanted->id_type = id_type;
+	id_wanted->data_type = data_type;
 	id_wanted->next = *id_table;
 	*id_table = id_wanted;
 	id_wanted->offset = -1; /* Unset address */
@@ -139,7 +140,7 @@ void cat_tac(struct op *dest, struct tac *src) {
 // 和cat_tac不同之处在于，释放了作为struct op的src
 void cat_op(struct op *dest, struct op *src) {
 	cat_tac(dest, src->code);
-	free(src);
+	// free(src); // hjj: free会导致continue和break出错，无法捕捉需要parse的op
 }
 
 struct op *cat_list(struct op *exp_1, struct op *exp_2) {
@@ -174,12 +175,6 @@ struct op *new_op() {
 	return nop;
 }
 
-// struct var_list *new_var_list() {
-// 	struct var_list *varl;
-// 	MALLOC_AND_SET_ZERO(varl, 1, struct var_list);
-// 	return varl;
-// }
-
 struct tac *new_tac(int type, struct id *id_1, struct id *id_2,
 					struct id *id_3) {
 	struct tac *ntac = (struct tac *)malloc(sizeof(struct tac));
@@ -204,6 +199,14 @@ struct id *new_label() {
 	NAME_ALLOC(label);
 	sprintf(label, "label_%d", label_amount++);
 	return add_identifier(label, ID_TEMP, NO_DATA);
+}
+
+struct block *new_block(struct id *l_begin, struct id *l_end) {
+	struct block *nstack;
+	MALLOC_AND_SET_ZERO(nstack, 1, struct block);
+	nstack->label_begin = l_begin;
+	nstack->label_end = l_end;
+	return nstack;
 }
 
 const char *id_to_str(struct id *id) {

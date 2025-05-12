@@ -50,10 +50,11 @@ void yyerror(char* msg);
 %type <operation> input_statement
 %type <operation> output_statement
 %type <operation> return_statement
-%type <operation> null_statement
 %type <operation> if_statement
 %type <operation> while_statement
 %type <operation> for_statement
+%type <operation> break_statement
+%type <operation> continue_statement
 %type <operation> call_statement
 %type <operation> statement_or_expression_or_null
 %type <operation> assign_statement_or_null
@@ -66,7 +67,7 @@ void yyerror(char* msg);
 %type <type> data_type
 
 %token EQ NE LT LE GT GE
-%token IF THEN ELSE FI WHILE FOR DO DONE CONTINUE FUNC INPUT OUTPUT RETURN
+%token IF THEN ELSE FI WHILE FOR DO DONE BREAK CONTINUE FUNC INPUT OUTPUT RETURN
 
 %left INC DEC
 %left EQ NE LT LE GT GE
@@ -197,10 +198,6 @@ statement : assign_statement ';'
                             {
                                 $$ = cpy_op($1);
                             }
-| null_statement ';'
-                            {
-                                $$ = cpy_op($1);
-                            }
 | if_statement
                             {
                                 $$ = cpy_op($1);
@@ -210,6 +207,14 @@ statement : assign_statement ';'
                                 $$ = cpy_op($1);
                             }
 | for_statement 
+                            {
+                                $$ = cpy_op($1);
+                            }
+| break_statement ';'           
+                            {
+                                $$ = cpy_op($1);
+                            }
+| continue_statement ';'           
                             {
                                 $$ = cpy_op($1);
                             }
@@ -255,11 +260,6 @@ return_statement : RETURN expression
                             }
 ;
 
-null_statement : CONTINUE   
-                            {
-                                $$ = new_op();
-                            }
-;
 
 if_statement : IF '(' expression ')' block
                             {
@@ -271,17 +271,37 @@ if_statement : IF '(' expression ')' block
                             }
 ;
 
-while_statement : WHILE '(' expression ')' block
+while_head : WHILE 
+                            {
+                                block_initialize();
+                            }
+
+for_head : FOR
+                            {
+                                block_initialize();
+                            }
+
+while_statement : while_head '(' expression ')' block
                             {
                                 $$ = process_while($3,$5);
                             }
 ;
 
-for_statement : FOR '(' assign_statement_or_null ';' expression_or_null ';' statement_or_expression_or_null ')' block
+for_statement : for_head '(' assign_statement_or_null ';' expression_or_null ';' statement_or_expression_or_null ')' block
                             {
                                 $$ = process_for($3,$5,$7,$9);
                             }
 ;
+
+break_statement : BREAK
+                            {
+                                $$ = process_break();
+                            }
+
+continue_statement : CONTINUE
+                            {
+                                $$ = process_continue();
+                            }
 
 call_statement : IDENTIFIER '(' argument_list ')'
                             {
