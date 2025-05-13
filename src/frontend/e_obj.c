@@ -41,7 +41,9 @@ static void rdesc_clear_prev(int r) {
 static void rdesc_clear_temp(int r) {
 	rdesc[r].var = NULL;
 	rdesc[r].mod = 0;
-	rdesc[r].prev->next = NULL;
+	if (rdesc[r].prev != NULL) {
+		rdesc[r].prev->next = NULL;
+	}
 	rdesc[r].prev = NULL;
 }
 
@@ -170,9 +172,6 @@ static int reg_find(struct id *s) {
 	for (first_appear = R_GEN; first_appear < R_NUM; first_appear++) {
 		if (rdesc[first_appear].var == s) {
 			FIND_LATEST_RDESC(first_appear, latest_appear);
-			if (!strcmp(s->name, "a")) {
-				printf("goint to find latest a: %d\n", latest_appear);
-			}
 			return latest_appear;
 		}
 	}

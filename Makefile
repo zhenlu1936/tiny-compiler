@@ -5,7 +5,7 @@ BCKDIR := $(SRCDIR)/backend
 INCDIR := $(SRCDIR)/include
 BUILDDIR := build
 TESTDIR := test
-TESTSRC := clear
+TESTSRC := test
 
 # Sources and generated files
 FRONT_SRCS := $(FRTDIR)/e_proc.c   \
