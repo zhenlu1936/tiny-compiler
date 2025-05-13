@@ -2,8 +2,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <string.h>
+#include <time.h>
 
 // 全局变量
 struct rdesc rdesc[R_NUM];
@@ -33,7 +33,9 @@ void rdesc_clear_prev(int r) {
 void rdesc_clear_temp(int r) {
 	rdesc[r].var = NULL;
 	rdesc[r].mod = 0;
-	rdesc[r].prev->next = NULL;
+	if (rdesc[r].prev != NULL) {
+		rdesc[r].prev->next = NULL;
+	}
 	rdesc[r].prev = NULL;
 }
 
