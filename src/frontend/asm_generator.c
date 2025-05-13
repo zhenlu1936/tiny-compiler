@@ -11,29 +11,26 @@ int oof = 0;  // 参数偏移
 int oon = 0;  // 临时偏移
 
 void asm_bin(char *op, struct id *a, struct id *b, struct id *c) {
-	int reg_temp = -1, reg_c = -1;
-	while (reg_temp == reg_c) {
-		reg_temp = reg_alloc(b);
+	int reg_b_new = -1, reg_c = -1;
+	while (reg_b_new == reg_c) {
+		reg_b_new = reg_alloc(b);
 		reg_c = reg_find(c);
 	}
-	// asm_write_back(reg_b);
-	input_str(obj_file, "	%s R%u,R%u\n", op, reg_temp, reg_c);
-	rdesc_fill(reg_temp, a, MODIFIED);
+	input_str(obj_file, "	%s R%u,R%u\n", op, reg_b_new, reg_c);
+	rdesc_clear_prev(reg_b_new);
+	rdesc_fill(reg_b_new, a, MODIFIED);
 }
 
 // hjj
-// void asm_cmp(char* op, struct id *a, struct id *b, struct id *c) {
 void asm_cmp(int op, struct id *a, struct id *b, struct id *c) {
 	int reg_temp = -1, reg_c = -1;
 
 	// hjj
 	// 分配寄存器，确保 temp 和 c 不在同一个寄存器中
 	while (reg_temp == reg_c) {
-		// reg_temp = reg_find(b);
 		reg_temp = reg_alloc(b);
 		reg_c = reg_find(c);
 	}
-	// asm_write_back(reg_temp);
 
 	// hjj: 原逻辑有误，不能直接修改存储符号的寄存器，应该分配一个临时符号
 	input_str(obj_file, "	SUB R%u,R%u\n", reg_temp, reg_c);
@@ -96,7 +93,7 @@ void asm_cmp(int op, struct id *a, struct id *b, struct id *c) {
 	}
 
 	// 清除寄存器描述符并更新 a 的描述符
-	rdesc_clear(reg_temp);
+	rdesc_clear_temp(reg_temp);
 	rdesc_fill(reg_temp, a, MODIFIED);
 }
 
@@ -124,7 +121,7 @@ void asm_cond(char *op, struct id *a, const char *l) {
 void asm_call(struct id *a, struct id *b) {
 	int r;
 	for (int r = R_GEN; r < R_NUM; r++) asm_write_back(r);
-	for (int r = R_GEN; r < R_NUM; r++) rdesc_clear(r);
+	for (int r = R_GEN; r < R_NUM; r++) rdesc_clear_all(r);
 	input_str(obj_file, "	STO (R2+%d),R2\n", tof + oon); /* store old bp */
 	oon += 4;
 	input_str(obj_file, "	LOD R4,R1+32\n"); /* return addr: 4*8=32 */
@@ -143,7 +140,7 @@ void asm_call(struct id *a, struct id *b) {
 
 void asm_return(struct id *a) {
 	for (int r = R_GEN; r < R_NUM; r++) asm_write_back(r);
-	for (int r = R_GEN; r < R_NUM; r++) rdesc_clear(r);
+	for (int r = R_GEN; r < R_NUM; r++) rdesc_clear_all(r);
 
 	if (a != NULL) /* return value */
 	{

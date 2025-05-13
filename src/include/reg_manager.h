@@ -8,7 +8,7 @@
 #define R_JP 3
 #define R_TP 4
 #define R_GEN 5
-#define R_NUM 16
+#define R_NUM 14
 
 /* frame */
 #define FORMAL_OFF -4 	/* first formal parameter */
@@ -25,13 +25,24 @@
 struct rdesc {
     struct id *var; // 当前寄存器存储的变量
     int mod;        // 是否被修改
+	struct rdesc *next;
+	struct rdesc *prev;
 };
 
 // 全局变量
-extern struct rdesc rdesc[R_NUM];
+extern struct rdesc rdesc[];
+
+#define RDESC_NUM(p_rdesc) (p_rdesc - rdesc)
+#define FIND_LATEST_RDESC(first_appear,latest_appear) \
+	int latest_appear = first_appear; \
+	while (rdesc[latest_appear].next) { \
+		latest_appear = RDESC_NUM(rdesc[latest_appear].next); \
+	}
 
 // 函数声明
-void rdesc_clear(int r);
+void rdesc_clear_all(int r);
+void rdesc_clear_prev(int r);
+void rdesc_clear_temp(int r);
 void rdesc_fill(int r, struct id *s, int mod);
 void asm_write_back(int r);
 void asm_load(int r, struct id *s);

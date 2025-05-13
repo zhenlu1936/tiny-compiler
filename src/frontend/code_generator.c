@@ -114,7 +114,7 @@ void asm_code(struct tac *code) {
 
 		case TAC_LABEL:
 			for (int r = R_GEN; r < R_NUM; r++) asm_write_back(r);
-			for (int r = R_GEN; r < R_NUM; r++) rdesc_clear(r);
+			for (int r = R_GEN; r < R_NUM; r++) rdesc_clear_all(r);
 			input_str(obj_file, "%s:\n", code->id_1->name);
 			return;
 
