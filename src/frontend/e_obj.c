@@ -16,22 +16,50 @@ int oof; /* offset of formal */
 int oon; /* offset of next frame */
 struct rdesc rdesc[R_NUM];
 
-// 清除寄存器描述符
-static void rdesc_clear(int r) {
+// 清除某变量对应的所有寄存器描述符
+static void rdesc_clear_all(int r) {
 	rdesc[r].var = NULL;
 	rdesc[r].mod = 0;
+	rdesc[r].next = NULL;
+	if (rdesc[r].prev != NULL) {
+		int pre = RDESC_NUM(rdesc[r].prev);
+		rdesc[r].prev = NULL;
+		rdesc_clear_all(pre);
+	}
+}
+
+// 清除某变量对应的所有非最新的寄存器描述符
+static void rdesc_clear_prev(int r) {
+	if (rdesc[r].prev != NULL) {
+		int pre = RDESC_NUM(rdesc[r].prev);
+		rdesc[r].prev = NULL;
+		rdesc_clear_all(pre);
+	}
+}
+
+// 清除临时的寄存器描述符
+static void rdesc_clear_temp(int r) {
+	rdesc[r].var = NULL;
+	rdesc[r].mod = 0;
+	rdesc[r].prev->next = NULL;
+	rdesc[r].prev = NULL;
 }
 
 // 填充寄存器描述符
 static void rdesc_fill(int r, struct id *s, int mod) {
 	// hjj: 需要允许同时有数个寄存器存储同一符号的情况，在asm_cmp会用到
-	// int old;
-	// for (old = R_GEN; old < R_NUM; old++) {
-	// 	if (rdesc[old].var == s) {
-	// 		rdesc_clear(old);
-	// 	}
-	// }
-
+	// hjj: 用链表存储某个var对应的rdesc的先后次序
+	int first_appear;
+	for (first_appear = R_GEN; first_appear < R_NUM; first_appear++) {
+		if (rdesc[first_appear].var == s) {
+			FIND_LATEST_RDESC(first_appear, latest_appear);
+			if (r != latest_appear) {
+				rdesc[latest_appear].next = &rdesc[r];
+				rdesc[r].prev = &rdesc[latest_appear];
+			}
+			break;	// hjj: 对每个var只有一条链表及头结点，也就是最小的rdesc
+		}
+	}
 	rdesc[r].var = s;
 	rdesc[r].mod = mod;
 }
@@ -53,17 +81,20 @@ static void asm_write_back(int r) {
 	}
 }
 
-// hjj: 有优化余地。先前已经找过一次，就不用再找
 // 加载符号到寄存器
 static void asm_load(int r, struct id *s) {
 	/* already in a reg */
-	for (int i = R_GEN; i < R_NUM; i++) {
-		if (rdesc[i].var == s) {
-			/* load from the reg */
-			input_str(obj_file, "	LOD R%u,R%u\n", r, i);
+	for (int first_appear = R_GEN; first_appear < R_NUM; first_appear++) {
+		if (rdesc[first_appear].var == s) {
+			// hjj: 应该找最近被修改的寄存器，找下一个
+			FIND_LATEST_RDESC(first_appear, latest_appear);
 
-			/* update rdesc */
-			// rdesc_fill(r, s, rdesc[i].mod);
+			/* load from the reg */
+			if (r != latest_appear) {
+				input_str(obj_file, "	LOD R%u,R%u\n", r, latest_appear);
+				rdesc[latest_appear].next = &rdesc[r];
+				rdesc[r].prev = &rdesc[latest_appear];
+			}
 			return;
 		}
 	}
@@ -131,14 +162,18 @@ static int reg_alloc(struct id *s) {
 	return random;
 }
 
-// 寻找符号对应的寄存器
+// 寻找符号对应的最晚被修改的寄存器
 static int reg_find(struct id *s) {
-	int r;
+	int first_appear;
 
 	/* already in a register */
-	for (r = R_GEN; r < R_NUM; r++) {
-		if (rdesc[r].var == s) {
-			return r;
+	for (first_appear = R_GEN; first_appear < R_NUM; first_appear++) {
+		if (rdesc[first_appear].var == s) {
+			FIND_LATEST_RDESC(first_appear, latest_appear);
+			if (!strcmp(s->name, "a")) {
+				printf("goint to find latest a: %d\n", latest_appear);
+			}
+			return latest_appear;
 		}
 	}
 
@@ -147,16 +182,16 @@ static int reg_find(struct id *s) {
 
 // 生成二元运算对应的汇编代码
 static void asm_bin(char *op, struct id *a, struct id *b, struct id *c) {
-	int reg_temp = -1, reg_c = -1;
+	int reg_b_new = -1, reg_c = -1;
 
-	while (reg_temp == reg_c) {
-		reg_temp = reg_alloc(b);
+	while (reg_b_new == reg_c) {
+		reg_b_new = reg_alloc(b);
 		reg_c = reg_find(c);
 	}
 
-	asm_write_back(reg_temp); // modified
-	input_str(obj_file, "	%s R%u,R%u\n", op, reg_temp, reg_c);
-	rdesc_fill(reg_temp, a, MODIFIED);
+	input_str(obj_file, "	%s R%u,R%u\n", op, reg_b_new, reg_c);
+	rdesc_clear_prev(reg_b_new);
+	rdesc_fill(reg_b_new, a, MODIFIED);
 }
 
 // 生成比较运算对应的汇编代码
@@ -168,7 +203,6 @@ static void asm_cmp(int op, struct id *a, struct id *b, struct id *c) {
 		reg_c = reg_find(c);
 	}
 
-	asm_write_back(reg_temp); // modified
 	input_str(obj_file, "	SUB R%u,R%u\n", reg_temp, reg_c);
 	input_str(obj_file, "	TST R%u\n", reg_temp);
 
@@ -229,7 +263,7 @@ static void asm_cmp(int op, struct id *a, struct id *b, struct id *c) {
 	}
 
 	/* Delete c from the descriptors and insert a */
-	rdesc_clear(reg_temp);
+	rdesc_clear_temp(reg_temp);
 	rdesc_fill(reg_temp, a, MODIFIED);
 }
 
@@ -259,7 +293,7 @@ static void asm_cond(char *op, struct id *a, const char *l) {
 static void asm_call(struct id *a, struct id *b) {
 	int r;
 	for (int r = R_GEN; r < R_NUM; r++) asm_write_back(r);
-	for (int r = R_GEN; r < R_NUM; r++) rdesc_clear(r);
+	for (int r = R_GEN; r < R_NUM; r++) rdesc_clear_all(r);
 	input_str(obj_file, "	STO (R2+%d),R2\n", tof + oon); /* store old bp */
 	oon += 4;
 	input_str(obj_file, "	LOD R4,R1+32\n"); /* return addr: 4*8=32 */
@@ -279,7 +313,7 @@ static void asm_call(struct id *a, struct id *b) {
 // 生成函数返回对应的汇编代码
 static void asm_return(struct id *a) {
 	for (int r = R_GEN; r < R_NUM; r++) asm_write_back(r);
-	for (int r = R_GEN; r < R_NUM; r++) rdesc_clear(r);
+	for (int r = R_GEN; r < R_NUM; r++) rdesc_clear_all(r);
 
 	if (a != NULL) /* return value */
 	{
@@ -320,7 +354,7 @@ static void asm_str(struct id *s) {
 	int i;
 
 	input_str(obj_file, "L%u:\n", s->label); /* Label for the string */
-	input_str(obj_file, "	DBS ");				  /* Label for the string */
+	input_str(obj_file, "	DBS ");			 /* Label for the string */
 
 	for (i = 1; t[i + 1] != 0; i++) {
 		if (t[i] == '\\') {
@@ -423,7 +457,7 @@ static void asm_code(struct tac *code) {
 
 		case TAC_LABEL:
 			for (int r = R_GEN; r < R_NUM; r++) asm_write_back(r);
-			for (int r = R_GEN; r < R_NUM; r++) rdesc_clear(r);
+			for (int r = R_GEN; r < R_NUM; r++) rdesc_clear_all(r);
 			input_str(obj_file, "%s:\n", code->id_1->name);
 			return;
 
