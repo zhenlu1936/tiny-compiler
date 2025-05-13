@@ -76,7 +76,7 @@ void asm_write_back(int r) {
 void asm_load(int r, struct id *s) {
 	for (int first_appear = R_GEN; first_appear < R_NUM; first_appear++) {
 		if (rdesc[first_appear].var == s) {
-			// hjj: 应该找最近被修改的寄存器，找下一个
+			// hjj: 应该找最近被修改的寄存器
 			FIND_LATEST_RDESC(first_appear, latest_appear);
 
 			/* load from the reg */
