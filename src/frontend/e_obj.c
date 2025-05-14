@@ -17,6 +17,7 @@ int oon; /* offset of next frame */
 struct rdesc rdesc[R_NUM];
 
 // 清除某变量对应的所有寄存器描述符
+// 由于reg_alloc不只是在bin和cmp里使用，所以不能删去clear_al
 static void rdesc_clear_all(int r) {
 	rdesc[r].var = NULL;
 	rdesc[r].mod = 0;
