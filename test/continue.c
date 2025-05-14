@@ -5,7 +5,7 @@ int main() {
 		while (1) {
 			continue;
 			while (1) {
-				continue;
+				break;
 			}
 			continue;
 		}
