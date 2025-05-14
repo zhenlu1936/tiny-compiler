@@ -19,6 +19,7 @@ int main() {
 			i = 5;
 		}
 	}
+	output "test succeed!\n";
 	// c = 1;
 	return a;
 }

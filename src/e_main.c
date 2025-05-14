@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "e_obj.h"
 #include "e_tac.h"
+#include "o_wrap.h"
 
 extern int yyparse();
 extern FILE *yyin;
