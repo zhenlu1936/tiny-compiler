@@ -9,7 +9,7 @@ TESTDIR := test
 TESTSRC := test
 
 # Sources and generated files
-MAIN_SRC := $(SRCDIR)/e_main.c
+MAIN_SRC := $(SRCDIR)/tiny_main.c
 
 FRONT_SRCS := $(FRTDIR)/e_proc.c   \
 		$(FRTDIR)/e_tac.c    
