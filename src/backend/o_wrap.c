@@ -16,7 +16,7 @@ int oof; /* offset of formal */
 int oon; /* offset of next frame */
 
 // 生成开始段，初始化栈和出口
-static void asm_head() {
+void asm_head() {
 	char head[] =
 		"	# head\n"
 		"	LOD R2,STACK\n"
@@ -29,7 +29,7 @@ static void asm_head() {
 }
 
 // 生成结束段
-static void asm_tail() {
+void asm_tail() {
 	char tail[] =
 		"\n	# tail\n"
 		"EXIT:\n"
@@ -39,7 +39,7 @@ static void asm_tail() {
 }
 
 // 生成字符串数据段
-static void asm_str(struct id *s) {
+void asm_str(struct id *s) {
 	const char *t = s->name; /* The text */
 	int i;
 
@@ -65,7 +65,7 @@ static void asm_str(struct id *s) {
 }
 
 // 生成静态数据段
-static void asm_static(void) {
+void asm_static(void) {
 	int i;
 
 	struct id *sl;
@@ -80,7 +80,7 @@ static void asm_static(void) {
 }
 
 // 根据单条三地址码，生成汇编代码
-static void asm_code(struct tac *code) {
+void asm_code(struct tac *code) {
 	int r;
 
 	switch (code->type) {

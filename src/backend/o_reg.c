@@ -45,7 +45,7 @@ void rdesc_clear_temp(int r) {
 }
 
 // 填充寄存器描述符
-static void rdesc_fill(int r, struct id *s, int mod) {
+void rdesc_fill(int r, struct id *s, int mod) {
 	// hjj: 需要允许同时有数个寄存器存储同一符号的情况，在asm_cmp会用到
 	// hjj: 用链表存储某个var对应的rdesc的先后次序
 	int first_appear;
@@ -63,7 +63,7 @@ static void rdesc_fill(int r, struct id *s, int mod) {
 	rdesc[r].mod = mod;
 }
 // 写回寄存器内容至内存
-static void asm_write_back(int r) {
+void asm_write_back(int r) {
 	if ((rdesc[r].var != NULL) && rdesc[r].mod) {
 		if (rdesc[r].var->scope == 1) /* local var */
 		{
@@ -80,7 +80,7 @@ static void asm_write_back(int r) {
 }
 
 // 加载符号到寄存器
-static void asm_load(int r, struct id *s) {
+void asm_load(int r, struct id *s) {
 	/* already in a reg */
 	for (int first_appear = R_GEN; first_appear < R_NUM; first_appear++) {
 		if (rdesc[first_appear].var == s) {
@@ -129,7 +129,7 @@ static void asm_load(int r, struct id *s) {
 	// rdesc_fill(r, s, UNMODIFIED);
 }
 // 为符号分配寄存器
-static int reg_alloc(struct id *s) {
+int reg_alloc(struct id *s) {
 	int r;
 
 	/* empty register */
@@ -160,7 +160,7 @@ static int reg_alloc(struct id *s) {
 }
 
 // 寻找符号对应的最晚被修改的寄存器
-static int reg_find(struct id *s) {
+int reg_find(struct id *s) {
 	int first_appear;
 
 	/* already in a register */

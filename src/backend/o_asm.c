@@ -10,7 +10,7 @@
 #include "e_tac.h"
 
 // 生成二元运算对应的汇编代码
-static void asm_bin(char *op, struct id *a, struct id *b, struct id *c) {
+void asm_bin(char *op, struct id *a, struct id *b, struct id *c) {
 	int reg_b_new = -1, reg_c = -1;
 
 	while (reg_b_new == reg_c) {
@@ -24,7 +24,7 @@ static void asm_bin(char *op, struct id *a, struct id *b, struct id *c) {
 }
 
 // 生成比较运算对应的汇编代码
-static void asm_cmp(int op, struct id *a, struct id *b, struct id *c) {
+void asm_cmp(int op, struct id *a, struct id *b, struct id *c) {
 	int reg_temp = -1, reg_c = -1;
 
 	while (reg_temp == reg_c) {
@@ -97,7 +97,7 @@ static void asm_cmp(int op, struct id *a, struct id *b, struct id *c) {
 }
 
 // 生成条件跳转(ifz)对应的汇编代码
-static void asm_cond(char *op, struct id *a, const char *l) {
+void asm_cond(char *op, struct id *a, const char *l) {
 	for (int r = R_GEN; r < R_NUM; r++) asm_write_back(r);
 
 	if (a != NULL) {
@@ -119,7 +119,7 @@ static void asm_cond(char *op, struct id *a, const char *l) {
 }
 
 // 生成函数调用对应的汇编代码
-static void asm_call(struct id *a, struct id *b) {
+void asm_call(struct id *a, struct id *b) {
 	int r;
 	for (int r = R_GEN; r < R_NUM; r++) asm_write_back(r);
 	for (int r = R_GEN; r < R_NUM; r++) rdesc_clear_all(r);
@@ -140,7 +140,7 @@ static void asm_call(struct id *a, struct id *b) {
 }
 
 // 生成函数返回对应的汇编代码
-static void asm_return(struct id *a) {
+void asm_return(struct id *a) {
 	for (int r = R_GEN; r < R_NUM; r++) asm_write_back(r);
 	for (int r = R_GEN; r < R_NUM; r++) rdesc_clear_all(r);
 
